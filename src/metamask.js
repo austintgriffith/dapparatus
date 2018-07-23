@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import deepmerge from 'deepmerge';
 import logo from './metamask.png';
 import Blockies from 'react-blockies';
-
+let interval
 let defaultConfig = {}
 defaultConfig.DEBUG = false;
 defaultConfig.POLLINTERVAL = 377
@@ -56,8 +56,11 @@ class Metamask extends Component {
     }
   }
   componentDidMount(){
-    setInterval(this.checkMetamask.bind(this),this.state.config.POLLINTERVAL)
+    interval = setInterval(this.checkMetamask.bind(this),this.state.config.POLLINTERVAL)
     this.checkMetamask()
+  }
+  componentWillUnmount(){
+    clearInterval(interval)
   }
   checkMetamask() {
     if(this.state.config.DEBUG) console.log("METAMASK - checking state...")
@@ -143,7 +146,7 @@ class Metamask extends Component {
         <div style={{zIndex:999999}} onClick={mmClick}>
           <a target="_blank" href="https://metamask.io/">
           <span style={this.props.warningStyle}>
-            Install MetaMask to play
+            Please Install MetaMask
           </span>
           <img style={{maxHeight:45,padding:5,verticalAlign:"middle"}}
           src={logo}
@@ -155,7 +158,7 @@ class Metamask extends Component {
       metamask = (
         <div>
           <span style={this.state.config.warningStyle}>
-              Unlock MetaMask to play
+              Please Unlock MetaMask
           </span>
           <img style={{maxHeight:45,padding:5,verticalAlign:"middle"}}
             src={logo}

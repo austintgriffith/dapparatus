@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Blockies from 'react-blockies';
 import deepmerge from 'deepmerge';
 let defaultConfig = {}
-defaultConfig.DEBUG = false;
+defaultConfig.DEBUG = true;
 defaultConfig.hide = true;
 class ContractLoader extends Component {
   constructor(props) {
@@ -36,6 +36,7 @@ class ContractLoader extends Component {
         contracts[contractName]._blocknumber = contractObject.blocknumber
         contracts[contractName]._address = contractObject.address
         contracts[contractName]._abi = contractObject.abi
+        contracts[contractName]._contract = contract
       }catch(e){
         console.log("ERROR LOADING CONTRACT "+contractName,e)
       }

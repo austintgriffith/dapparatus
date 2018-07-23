@@ -90,21 +90,16 @@ class Transactions extends Component {
   }
   render() {
     let transactions = []
-    let transactionsDisplay = ""
-
-    console.log(this.state.transactions)
-
     this.state.transactions.map((transaction)=>{
       let shortHash = transaction.hash.substring(0,6)
       let timePassed = Date.now()-transaction.time
       //let loadedPercent = Math.round(timePassed*100/this.props.avgBlockTime)/100
       transactions.push(
-        <div>
+        <div key={"tx"+transaction.hash}>
           TX {shortHash} ({transaction.callback}) ({transaction.receipt}) ({transaction.then}) [{transaction.confirmations}] [{transaction.addedFromCallback},{transaction.addedFromTxHash}]
         </div>
       )
     })
-
     return (
       <div style={{padding:10}}>
         <b>Transactions</b>

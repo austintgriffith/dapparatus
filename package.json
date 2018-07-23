@@ -36,12 +36,12 @@
     "babel-loader": "^7.1.4",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-polyfill": "^6.0.16",
     "babel-preset-env": "^1.7.0",
+    "babel-runtime": "^6.26.0",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
-    "babel-runtime": "^6.26.0",
-    "image-webpack-loader": "^4.3.1",
-    "babel-polyfill": "^6.0.16"
+    "url-loader": "^1.0.1"
   },
   "dependencies": {
     "react": "^16.4.1",
