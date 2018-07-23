@@ -32,7 +32,7 @@ class Gas extends Component {
   }
   checkOnGasPrices(){
     if(!this.state.config.hardcodedGwei){
-      axios.get("https://ethgasstation.info/json/ethgasAPI.json", { crossdomain: true , withCredentials: true})
+      axios.get("https://ethgasstation.info/json/ethgasAPI.json", { crossdomain: true })
       .then((response)=>{
         if(response.data.average>0&&response.data.average<200){
           response.data.average=response.data.average+(GASBOOSTPRICE*10)

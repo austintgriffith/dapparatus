@@ -273,7 +273,7 @@ class Transactions extends Component {
               >
               {currentStyles => {
                 return (
-                  <div style={{position:"relative",width:200,height:31,marginTop:10,right:currentStyles.outAmount}}>
+                  <div style={{position:"relative",width:200,height:31,marginTop:20,right:currentStyles.outAmount}}>
                       <a target="_blank" href={this.props.etherscan+"block/"+transaction.block}><Line width={100} percent={percent} strokeWidth="10" strokeColor={stroke} /> #{transaction.block} </a>
                   </div>
                 )
@@ -284,7 +284,7 @@ class Transactions extends Component {
       }
     })
 
-    let height = 36*transactions.length
+    let height = 60*transactions.length
     return (
         <div style={{zIndex:10,position:'fixed',paddingTop:30,marginBottom:0,textAlign:"right",bottom:100,right:0,opacity:1,height:height,width:200}}>
           {transactions}

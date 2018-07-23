@@ -54,7 +54,7 @@ class ContractLoader extends Component {
         for(let c in this.state.contracts){
           contractDisplay.push(
             <div key={"contract"+c} style={{margin:5,padding:5}}>
-              {c} ({this.state.contracts[c]._address}) - #{this.state.contracts[c].blocknumber}
+              {c} ({this.state.contracts[c]._address}) - #{this.state.contracts[c]._blocknumber}
             </div>
           )
         }
