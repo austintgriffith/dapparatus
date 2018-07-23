@@ -46,7 +46,9 @@ class ContractLoader extends Component {
     })
   }
   render(){
-    if(!this.state.config.hide){
+    if(this.state.config.hide){
+      return false
+    } else {
       let contractDisplay = []
       if(this.state.contracts){
         for(let c in this.state.contracts){
@@ -65,8 +67,6 @@ class ContractLoader extends Component {
           {contractDisplay}
         </div>
       )
-    }else{
-      return false
     }
   }
 }

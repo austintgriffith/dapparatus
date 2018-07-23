@@ -2,13 +2,23 @@ import React, { Component } from 'react';
 import Web3 from 'web3';
 let interval
 const LOOKBACK = 8//number of blocks that could pass without the interval firing
-const BLOCKSPERREAD = 524280//size of chunks to scan at a time
+const BLOCKSPERREAD = 250000//size of chunks to scan at a time
 const CHECKEVENTS = 377
+
+let defaultConfig = {}
+defaultConfig.DEBUG = false;
+defaultConfig.hide = true;
+
 class Events extends Component {
   constructor(props) {
     super(props);
+    let config = defaultConfig
+    if(props.config) {
+      config = deepmerge(config, props.config)
+    }
     this.state = {
-      events:[]
+      events:[],
+      config: config,
     }
   }
   componentDidMount(){
@@ -67,7 +77,7 @@ class Events extends Component {
       }
       if(from<=contractDeployBlock) lastRead=true
       from = Math.max(contractDeployBlock,from)
-      console.log("SCAN FOR EVENT:",eventName,"FROM",from,"to",to,contract)
+      if(this.state.config.DEBUG) console.log("SCAN FOR EVENT:",eventName,"FROM",from,"to",to,contract)
       let {events} = this.state
       let newEvents
       try{
@@ -96,22 +106,24 @@ class Events extends Component {
     this.setState({events:events})
   }
   render() {
-    let events = []
-
-    this.state.events.map((eventData)=>{
-      events.push(
-        <div key={"event"+eventData[this.props.id]}>
-          event {eventData[this.props.id]}
+    if(this.state.config.hide){
+      return false
+    } else {
+      let events = []
+      this.state.events.map((eventData)=>{
+        events.push(
+          <div key={"event"+eventData[this.props.id]}>
+            event {eventData[this.props.id]}
+          </div>
+        )
+      })
+      return (
+        <div style={{padding:10}}>
+          <b>Events</b>
+          {events}
         </div>
-      )
-    })
-
-    return (
-      <div style={{padding:10}}>
-        <b>Events</b>
-        {events}
-      </div>
-    );
+      );
+    }
   }
 }
 

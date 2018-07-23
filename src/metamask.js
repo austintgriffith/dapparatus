@@ -1,16 +1,17 @@
 import React, { Component } from 'react';
 import deepmerge from 'deepmerge';
 import logo from './metamask.png';
+import eth from './ethereum.png';
 import Blockies from 'react-blockies';
 let interval
 let defaultConfig = {}
 defaultConfig.DEBUG = false;
-defaultConfig.POLLINTERVAL = 377
+defaultConfig.POLLINTERVAL = 191
 defaultConfig.showBalance = true
 defaultConfig.hideNetworks = [
   "Mainnet"
 ]
-defaultConfig.accountCutoff = 10
+defaultConfig.accountCutoff = 16
 defaultConfig.outerBoxStyle = {
   float:'right'
 }
@@ -46,13 +47,16 @@ class Metamask extends Component {
     let config = defaultConfig
     if(props.config) {
       config = deepmerge(config, props.config)
+      if(props.config.requiredNetwork){ config.requiredNetwork = props.config.requiredNetwork}
     }
     this.state = {
       status:"loading",
       network:0,
       account:0,
       etherscan:"",
-      config: config
+      config: config,
+      avgBlockTime: 15000,
+      lastBlockTime: 0
     }
   }
   componentDidMount(){
@@ -110,11 +114,27 @@ class Metamask extends Component {
                     if(this.state.config.DEBUG) console.log("METAMASK - etherscan",etherscan)
                     if(this.state.status!="ready"||this.state.block!=block||this.state.balance!=balance) {
                       web3 = new Web3(window.web3.currentProvider)
-                      this.setState({status:"ready",block:block,balance:balance,network:network,web3Provider:window.web3.currentProvider,etherscan:etherscan,account:_accounts[0]},()=>{this.props.onUpdate(this.state)})
+                      let update = {
+                        status:"ready",
+                        block:block,
+                        balance:balance,
+                        network:network,
+                        web3Provider:window.web3.currentProvider,
+                        etherscan:etherscan,
+                        account:_accounts[0]
+                      }
+                      if(block!=this.state.block){
+                        //block update
+                        if(this.state.lastBlockTime){
+                            let timeItTook = Date.now() - this.state.lastBlockTime
+                            update.avgBlockTime = Math.round(this.state.avgBlockTime*4/5 + timeItTook/5)
+                        }
+                        update.lastBlockTime = Date.now()
+                      }
+                      this.setState(update,()=>{this.props.onUpdate(this.state)})
                     }
                   })
                 })
-
               }
             }
           })
@@ -213,7 +233,7 @@ class Metamask extends Component {
                  </div>
                  <div>
                    <span style={this.state.config.textStyle}>
-                     {network} {balance}
+                     {network}   <img style={{maxHeight:24,padding:2,verticalAlign:"middle",marginTop:-4}} src={eth}/>{balance}
                    </span>
                  </div>
                  <div style={{position:"absolute",right:this.state.config.blockieStyle.right,top:this.state.config.blockieStyle.top}} onClick={this.clickBlockie}>
