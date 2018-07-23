@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import deepmerge from 'deepmerge';
 import Web3 from 'web3';
 let interval
 const LOOKBACK = 8//number of blocks that could pass without the interval firing

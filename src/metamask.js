@@ -1,8 +1,9 @@
-import React, { Component } from 'react';
-import deepmerge from 'deepmerge';
-import logo from './metamask.png';
-import eth from './ethereum.png';
-import Blockies from 'react-blockies';
+import React, { Component } from 'react'
+import deepmerge from 'deepmerge'
+import logo from './metamask.png'
+import eth from './ethereum.png'
+import Scaler from "./scaler.js"
+import Blockies from 'react-blockies'
 let interval
 let defaultConfig = {}
 defaultConfig.DEBUG = false;
@@ -18,19 +19,29 @@ defaultConfig.outerBoxStyle = {
 defaultConfig.ETHPRECISION = 10000
 defaultConfig.boxStyle = {
   paddingRight:75,
+  marginTop:0,
+  paddingTop:0,
+  zIndex:10,
+  textAlign:"right",
+  width:300,
+}
+defaultConfig.boxStyleBefore = {
+  zIndex:9999,
   marginTop:3,
   paddingTop:7,
   zIndex:10,
-  fontWeight:'bold',
-  color:"#222",
+  color:"#666666",
   textAlign:"right",
-  width:200
+  width:450,
 }
 defaultConfig.textStyle = {
-  fontSize: 22
+  fontSize: 20,
+  fontWeight:'bold',
+  color:"#666666",
 }
 defaultConfig.warningStyle = {
-  fontSize: 16
+  fontWeight:'bold',
+  fontSize:24,
 }
 defaultConfig.blockieStyle = {
   size: 6,
@@ -163,7 +174,7 @@ class Metamask extends Component {
         window.open('https://metamask.io', '_blank');
       }
       metamask = (
-        <div style={{zIndex:999999}} onClick={mmClick}>
+        <div style={this.state.config.boxStyleBefore} onClick={mmClick}>
           <a target="_blank" href="https://metamask.io/">
           <span style={this.props.warningStyle}>
             Please Install MetaMask
@@ -176,7 +187,7 @@ class Metamask extends Component {
       )
     } else if(this.state.status=="locked"){
       metamask = (
-        <div>
+        <div style={this.state.config.boxStyleBefore}>
           <span style={this.state.config.warningStyle}>
               Please Unlock MetaMask
           </span>
@@ -250,9 +261,13 @@ class Metamask extends Component {
       metamask = "error unknown state: "+this.state.status
     }
     return (
-      <div style={this.state.config.outerBoxStyle}>
-        {metamask}
-      </div>
+
+        <div style={this.state.config.outerBoxStyle}>
+          <Scaler config={{origin:"top right",adjustedZoom:1.5}}>
+            {metamask}
+          </Scaler>
+        </div>
+
     )
   }
 }

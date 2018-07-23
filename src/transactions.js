@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
+import deepmerge from 'deepmerge';
 import {Motion, spring, presets} from 'react-motion'
 import { Line, Circle } from 'rc-progress';
+import Scaler from "./scaler.js"
 import Web3 from 'web3';
 
 let interval
@@ -260,22 +262,24 @@ class Transactions extends Component {
 
 
         transactions.push(
-          <Motion key={"block"+transaction.block}
-            defaultStyle={{
-              outAmount:-200
-            }}
-            style={{
-              outAmount:spring(outAmount,{ stiffness: 80, damping: 8 })
-            }}
-            >
-            {currentStyles => {
-              return (
-                <div style={{position:"relative",width:200,height:31,marginTop:10,right:currentStyles.outAmount}}>
-                    <a target="_blank" href={this.props.etherscan+"block/"+transaction.block}><Line width={100} percent={percent} strokeWidth="10" strokeColor={stroke} /> #{transaction.block} </a>
-                </div>
-              )
-            }}
-          </Motion>
+          <Scaler config={{origin:"bottom right",adjustedZoom:1.2}} key={"block"+transaction.block}>
+            <Motion
+              defaultStyle={{
+                outAmount:-200
+              }}
+              style={{
+                outAmount:spring(outAmount,{ stiffness: 80, damping: 8 })
+              }}
+              >
+              {currentStyles => {
+                return (
+                  <div style={{position:"relative",width:200,height:31,marginTop:10,right:currentStyles.outAmount}}>
+                      <a target="_blank" href={this.props.etherscan+"block/"+transaction.block}><Line width={100} percent={percent} strokeWidth="10" strokeColor={stroke} /> #{transaction.block} </a>
+                  </div>
+                )
+              }}
+            </Motion>
+          </Scaler>
         )
       }
     })
