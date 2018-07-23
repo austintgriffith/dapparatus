@@ -132,14 +132,16 @@ class Transactions extends Component {
     clearInterval(interval)
   }
   checkTxs() {
-
+    //console.log("Checking transactions")
     let {web3,block} = this.props
     let {transactions,currentBlock} = this.state
 
     for(let t in transactions){
-      if(!transactions[t].receipt&&transactions[t].hash){
+      if(!transactions[t].fullReceipt&&transactions[t].hash){
+        //.log("checking in on "+transactions[t].hash)
         web3.eth.getTransactionReceipt(transactions[t].hash,(err,receipt)=>{
           if(receipt){
+            //console.log("GOT RECEPIT FOR ",transactions[t].hash)
             let currentTransactions = this.state.transactions
             for(let t in currentTransactions){
               if(currentTransactions[t].hash == receipt.transactionHash){
@@ -203,7 +205,7 @@ class Transactions extends Component {
         }
 
         if(transaction.closed){
-          outAmount = -200
+          outAmount = -250
         }
         if(percent>=100&&!complete){
           stroke="#e4d426"
@@ -218,7 +220,7 @@ class Transactions extends Component {
         transactions.push(
           <Motion key={"tx"+transaction.hash}
             defaultStyle={{
-              outAmount:-200
+              outAmount:-250
             }}
             style={{
               outAmount:spring(outAmount,{ stiffness: 80, damping: 8 })
