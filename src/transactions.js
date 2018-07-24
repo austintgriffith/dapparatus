@@ -12,8 +12,8 @@ defaultConfig.DEBUG = false;
 defaultConfig.hide = false;
 defaultConfig.TIMETOKEEPTXSAROUND = 90000;
 defaultConfig.CHECKONTXS = 731;
-defaultConfig.GASLIMITMULTIPLIER = 1.1;
-defaultConfig.EXPECTEDPROGRESSBARVSAVGBLOCKTIME = 1.8;
+defaultConfig.GASLIMITMULTIPLIER = 1.2;
+defaultConfig.EXPECTEDPROGRESSBARVSAVGBLOCKTIME = 2.1;
 
 class Transactions extends Component {
   constructor(props) {

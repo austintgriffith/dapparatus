@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import axios from "axios"
 import deepmerge from 'deepmerge';
-const GASBOOSTPRICE = 0.11 //gwei
+const GASBOOSTPRICE = 0.21 //gwei
 
 let pollInterval
 let pollTime = 39007
