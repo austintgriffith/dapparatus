@@ -32,13 +32,13 @@ class Transactions extends Component {
     interval = setInterval(this.checkTxs.bind(this),this.state.config.CHECKONTXS)
     this.checkTxs()
     this.props.onReady({
-      tx: async (tx)=>{
+      tx: async (tx,maxGasLimit)=>{
         if(this.state.config.DEBUG) console.log("YOU WANT TO SEND TX ",tx,this.props.gwei)
         let gasLimit
         try{
           gasLimit = Math.round((await tx.estimateGas()) * this.state.config.GASLIMITMULTIPLIER)
         }catch(e){
-          gasLimit = 400000
+          gasLimit = maxGasLimit
         }
 
         if(this.state.config.DEBUG) console.log("gasLimit",gasLimit)
