@@ -185,9 +185,10 @@ class Transactions extends Component {
     let transactions = []
     this.state.transactions.map((transaction)=>{
       if(transaction.hash){
-        let shortHash = transaction.hash.substring(0,16)
+        let shortHash = transaction.hash.substring(0,14)
         let timePassed = Date.now()-transaction.time
-        let percent = Math.min(100,Math.round(timePassed*100/this.props.avgBlockTime))
+        //transactions expected to take 1.5 the time blocks are taking
+        let percent = Math.min(100,Math.round(timePassed*100/(this.props.avgBlockTime*this.state.config.EXPECTEDPROGRESSBARVSAVGBLOCKTIME*1.5)))
 
         let outAmount = 10
         let complete = 0
