@@ -4,6 +4,8 @@ import logo from './metamask.png'
 import eth from './ethereum.png'
 import Scaler from "./scaler.js"
 import Blockies from 'react-blockies'
+import ENS from 'ethereum-ens'
+
 let interval
 let defaultConfig = {}
 defaultConfig.DEBUG = false;
@@ -111,6 +113,7 @@ class Metamask extends Component {
               } else if(_accounts.length<=0){
                 if(this.state.status!="locked") this.setState({status:"locked",network:network},()=>{this.props.onUpdate(this.state)})
               } else{
+
                 window.web3.eth.getBlockNumber((err,block)=>{
                   window.web3.eth.getBalance(""+_accounts[0],(err,balance,e)=>{
                     balance=balance.toNumber()/1000000000000000000
@@ -125,6 +128,20 @@ class Metamask extends Component {
                     if(this.state.config.DEBUG) console.log("METAMASK - etherscan",etherscan)
                     if(this.state.status!="ready"||this.state.block!=block||this.state.balance!=balance) {
                       web3 = new Web3(window.web3.currentProvider)
+                      let ens = new ENS(window.web3.currentProvider);
+                      if(this.state.config.DEBUG)console.log("attempting to ens reverse account....")
+                      try {
+                        var address = ens.reverse(_accounts[0]).name().catch((err)=>{
+                          if(this.state.config.DEBUG) console.log("catch ens error (probably just didn't find it, ignore silently)")
+                        }).then((data) => {
+                           console.log("ENS data",data)
+                           if(data){
+                             this.setState({ens:data},()=>{this.props.onUpdate(this.state)})
+                           }
+
+                        });
+                      }catch(e){}
+
                       let update = {
                         status:"ready",
                         block:block,
@@ -234,12 +251,16 @@ class Metamask extends Component {
            if(this.state.config.showBalance){
              balance = Math.round(this.state.balance*this.state.config.ETHPRECISION)/this.state.config.ETHPRECISION
            }
+
+           let displayName = this.state.account.substr(0,this.state.config.accountCutoff)
+           if(this.state.ens) displayName = this.state.ens
+
            metamask = (
              <div style={this.state.config.boxStyle}>
                <a target="_blank" href={this.state.etherscan+"address/"+this.state.account}>
                  <div>
                    <span style={this.state.config.textStyle}>
-                     {this.state.account.substr(0,this.state.config.accountCutoff)}
+                     {displayName}
                    </span>
                  </div>
                  <div>
@@ -264,7 +285,7 @@ class Metamask extends Component {
 
         <div style={this.state.config.outerBoxStyle}>
           <Scaler config={{origin:"top right",adjustedZoom:1.5}}>
-            {metamask}
+                {metamask}
           </Scaler>
         </div>
 
