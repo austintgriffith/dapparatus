@@ -4,6 +4,9 @@ After building out a handful of Dapps in React, I decided to carve out all the c
 
 Should help get a Dapp up and running quickly so you can focus on your functionality, not wrestling with the blockchain and ethereum network.
 
+A good example and development walkthrough is
+[nifties-vs-nfties](https://github.com/austintgriffith/nifties-vs-nfties/blob/master/README.md).
+
 ## install
 
 ```
@@ -20,6 +23,8 @@ import { Metamask, Gas, ContractLoader, Transactions, Events, Scaler } from "dap
 
 ### Metamask
 
+Looks for injected web3 and provides an interface to the rest of the components. Also displays a nice HUD for users to see what account is logged in, what network they are on, and how much Ethereum they have. 
+
 ```
 <Metamask
   /*config={{requiredNetwork:['Ropsten']}}*/
@@ -35,6 +40,8 @@ import { Metamask, Gas, ContractLoader, Transactions, Events, Scaler } from "dap
 
 ### Gas
 
+Keeps track of the best gas price in gwei and delivers it to other components.
+
 ```
 <Gas
   onUpdate={(state)=>{
@@ -48,6 +55,8 @@ import { Metamask, Gas, ContractLoader, Transactions, Events, Scaler } from "dap
 
 ### Transactions
 
+Displays transactions and blocks as progress bars and provides a **tx** function to make calling smart contract functions and sending transactions easier and more transparent to the user.
+
 ```
 <Transactions
   account={account}
@@ -57,6 +66,8 @@ import { Metamask, Gas, ContractLoader, Transactions, Events, Scaler } from "dap
   avgBlockTime={avgBlockTime}
   etherscan={etherscan}
   onReady={(state)=>{
+    //loads in tx() function
+    // use to send transactions: tx(contracts.YOURCONTRACT.YOURFUNCTION(),GASLIMIT)
     console.log("Transactions component is ready:",state)
     this.setState(state)
   }}
@@ -64,6 +75,8 @@ import { Metamask, Gas, ContractLoader, Transactions, Events, Scaler } from "dap
 ```
 
 ## ContractLoader
+
+Loads your contracts published from [Clevis](https://github.com/austintgriffith/clevis) into **this.state.contracts**.
 
 ```
 <ContractLoader
@@ -77,6 +90,8 @@ import { Metamask, Gas, ContractLoader, Transactions, Events, Scaler } from "dap
 ```
 
 ### Events
+
+Listens for events and parses down the chain. Use an **id** field for unique keys so it will only fire the **onUpdate** function when a new event is detected. Provide a **filter** object to filter indexed fields.
 
 ```
 <Events
@@ -93,3 +108,11 @@ import { Metamask, Gas, ContractLoader, Transactions, Events, Scaler } from "dap
 ```
 
 ### Scaler
+
+Scales components based on a target screen width vs actual screen width. Get your Dapp looking awesome on mobile.
+
+```
+<Scaler config={{origin:"50px 50px",adjustedZoom:1.3}}>
+  <img style={{position:"absolute",left:10,top:10,maxHeight:120,margin:10}} src={titleImage}/>
+</Scaler>
+```
