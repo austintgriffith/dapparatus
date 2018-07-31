@@ -32,7 +32,7 @@ class Transactions extends Component {
     interval = setInterval(this.checkTxs.bind(this),this.state.config.CHECKONTXS)
     this.checkTxs()
     this.props.onReady({
-      tx: async (tx,maxGasLimit)=>{
+      tx: async (tx,maxGasLimit,txData)=>{
         if(this.state.config.DEBUG) console.log("YOU WANT TO SEND TX ",tx,this.props.gwei)
         let gasLimit
         try{
@@ -41,13 +41,18 @@ class Transactions extends Component {
           gasLimit = maxGasLimit
         }
 
-        if(this.state.config.DEBUG) console.log("gasLimit",gasLimit)
-        if(this.state.config.DEBUG) console.log("this.props.gwei",this.props.gwei)
-        tx.send({
+        let paramsObject = {
           from: this.props.account,
           gas:gasLimit,
           gasPrice:Math.round(this.props.gwei * 1000000000)
-        },(error, transactionHash)=>{
+        }
+        if(txData){
+          paramsObject.data = txData
+        }
+
+        if(this.state.config.DEBUG) console.log("gasLimit",gasLimit)
+        if(this.state.config.DEBUG) console.log("this.props.gwei",this.props.gwei)
+        tx.send(paramsObject,(error, transactionHash)=>{
           if(this.state.config.DEBUG) console.log("TX CALLBACK",error,transactionHash)
           let currentTransactions = this.state.transactions
           let found = false
@@ -132,7 +137,6 @@ class Transactions extends Component {
     clearInterval(interval)
   }
   checkTxs() {
-    //console.log("Checking transactions")
     let {web3,block} = this.props
     let {transactions,currentBlock} = this.state
 
@@ -145,7 +149,13 @@ class Transactions extends Component {
             let currentTransactions = this.state.transactions
             for(let t in currentTransactions){
               if(currentTransactions[t].hash == receipt.transactionHash){
-                currentTransactions[t].fullReceipt = receipt
+                if(!currentTransactions[t].fullReceipt){
+                  currentTransactions[t].fullReceipt = receipt
+                  if(typeof this.props.onReceipt =="function"){
+                    this.props.onReceipt(currentTransactions[t],receipt)
+                  }
+                }
+
               }
             }
             this.setState({transactions:currentTransactions})

@@ -1,10 +1,11 @@
-import React, { Component } from 'react';
-import deepmerge from 'deepmerge';
-import Web3 from 'web3';
+import React, { Component } from 'react'
+import deepmerge from 'deepmerge'
+import Web3 from 'web3'
+import md5  from 'md5'
 let interval
-const LOOKBACK = 8//number of blocks that could pass without the interval firing
+const LOOKBACK = 6//number of blocks that could pass without the interval firing
 const BLOCKSPERREAD = 250000//size of chunks to scan at a time
-const CHECKEVENTS = 377
+const CHECKEVENTS = 799
 
 let defaultConfig = {}
 defaultConfig.DEBUG = false;
@@ -51,13 +52,23 @@ class Events extends Component {
       }
       for(let e in newEvents){
         let thisEvent = newEvents[e].returnValues
-        thisEvent.blockNumber = newEvents[e].blockNumber
-        if(!events[thisEvent[id]]){
-          events[thisEvent[id]]=thisEvent
-          onUpdate(thisEvent,events);
+        let keyArray = Object.keys(thisEvent)
+        let keyCount = keyArray.length
+        let eventObject = {}
+        for(let k=keyCount/2;k<keyCount;k++){
+          eventObject[keyArray[k]] = thisEvent[keyArray[k]]
+        }
+        eventObject.blockNumber = newEvents[e].blockNumber
+        let idSafe = id
+        if(!idSafe){
+          idSafe = md5(JSON.stringify(eventObject))
+        }
+        if(this.state.config.DEBUG) console.log("CHECKED EVENT:",idSafe,eventObject)
+        if(!events[idSafe]){
+          events[idSafe]=eventObject
+          onUpdate(eventObject,events);
           this.setState({events:events})
         }
-
       }
     }catch(e){console.log(e)}
   }
@@ -96,10 +107,21 @@ class Events extends Component {
         }
         for(let e in newEvents){
           let thisEvent = newEvents[e].returnValues
-          thisEvent.blockNumber = newEvents[e].blockNumber
-          if(!events[thisEvent[id]]){
-            events[thisEvent[id]]=thisEvent
-            onUpdate(thisEvent,events);
+          let keyArray = Object.keys(thisEvent)
+          let keyCount = keyArray.length
+          let eventObject = {}
+          for(let k=keyCount/2;k<keyCount;k++){
+            eventObject[keyArray[k]] = thisEvent[keyArray[k]]
+          }
+          eventObject.blockNumber = newEvents[e].blockNumber
+          let idSafe = id
+          if(!idSafe){
+            idSafe = md5(JSON.stringify(eventObject))
+          }
+          if(this.state.config.DEBUG) console.log("SCANNED EVENT:",idSafe,eventObject)
+          if(!events[idSafe]){
+            events[idSafe]=eventObject
+            onUpdate(eventObject,events)
           }
         }
       }catch(e){console.log(e)}
@@ -107,20 +129,26 @@ class Events extends Component {
     this.setState({events:events})
   }
   render() {
+    let {eventName,filter,onUpdate,block,id} = this.props
     if(this.state.config.hide){
       return false
     } else {
       let events = []
-      this.state.events.map((eventData)=>{
+      for(let e in this.state.events){
         events.push(
-          <div key={"event"+eventData[this.props.id]}>
-            event {eventData[this.props.id]}
+          <div key={"event"+eventName+e} style={{fontSize:12}}>
+            {JSON.stringify(this.state.events[e])}
           </div>
         )
-      })
+      }
+      if(!events){
+        events = (
+          <div>(no events)</div>
+        )
+      }
       return (
         <div style={{padding:10}}>
-          <b>Events</b>
+          <b>---  {eventName}  -------</b>
           {events}
         </div>
       );

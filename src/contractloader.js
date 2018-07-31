@@ -16,6 +16,31 @@ class ContractLoader extends Component {
       contracts: {}
     }
   }
+  contractLoader(contractName,customAddress){
+    let {require} = this.props
+    let {DEBUG} = this.state.config
+    let resultingContract
+    try{
+      let contractObject = {
+        address:require("contracts/"+contractName+".address.js"),
+        abi:require("contracts/"+contractName+".abi.js"),
+        blocknumber:require("contracts/"+contractName+".blocknumber.js"),
+      }
+      if(customAddress){
+        contractObject.address = customAddress
+      }
+      if(DEBUG) console.log("ContractLoader - Loading ",contractName,contractObject.address)
+      let contract = new this.props.web3.eth.Contract(contractObject.abi,contractObject.address)
+      resultingContract = contract.methods
+      resultingContract._blocknumber = contractObject.blocknumber
+      resultingContract._address = contractObject.address
+      resultingContract._abi = contractObject.abi
+      resultingContract._contract = contract
+    }catch(e){
+      console.log("ERROR LOADING CONTRACT "+contractName,e)
+    }
+    return resultingContract
+  }
   componentDidMount(){
     let {require} = this.props
     let {DEBUG} = this.state.config
@@ -24,25 +49,10 @@ class ContractLoader extends Component {
     let contracts = {}
     for(let c in contractList){
       let contractName = contractList[c];
-      let contractObject = {
-        address:require("contracts/"+contractName+".address.js"),
-        abi:require("contracts/"+contractName+".abi.js"),
-        blocknumber:require("contracts/"+contractName+".blocknumber.js"),
-      }
-      try{
-        if(DEBUG) console.log("ContractLoader - Loading ",contractList[c],contractObject.address)
-        let contract = new this.props.web3.eth.Contract(contractObject.abi,contractObject.address)
-        contracts[contractName] = contract.methods
-        contracts[contractName]._blocknumber = contractObject.blocknumber
-        contracts[contractName]._address = contractObject.address
-        contracts[contractName]._abi = contractObject.abi
-        contracts[contractName]._contract = contract
-      }catch(e){
-        console.log("ERROR LOADING CONTRACT "+contractName,e)
-      }
+      contracts[contractName] = this.contractLoader(contractName)
     }
     this.setState({contracts:contracts},()=>{
-      this.props.onReady(this.state.contracts)
+      this.props.onReady(this.state.contracts,this.contractLoader.bind(this))
     })
   }
   render(){
