@@ -5,6 +5,7 @@ import ContractLoader from "./contractloader.js"
 import Events from "./events.js"
 import Scaler from "./scaler.js"
 import Blockie from "./blockie.js"
+import Address from "./address.js"
 
 module.exports['Gas']=Gas
 module.exports['Metamask']=Metamask
@@ -13,6 +14,8 @@ module.exports['ContractLoader']=ContractLoader
 module.exports['Events']=Events
 module.exports['Scaler']=Scaler
 module.exports['Blockie']=Blockie
+module.exports['Address']=Address
+
 /*
 export default {
   Gas: Gas,
