@@ -26,13 +26,14 @@ class Transactions extends Component {
       transactions:[],
       currentBlock:0,
       config: config,
+      callbacks: {}
     }
   }
   componentDidMount(){
     interval = setInterval(this.checkTxs.bind(this),this.state.config.CHECKONTXS)
     this.checkTxs()
     this.props.onReady({
-      tx: async (tx,maxGasLimit,txData)=>{
+      tx: async (tx,maxGasLimit,txData,cb)=>{
         if(this.state.config.DEBUG) console.log("YOU WANT TO SEND TX ",tx,this.props.gwei)
         let gasLimit
         try{
@@ -46,7 +47,10 @@ class Transactions extends Component {
           gas:gasLimit,
           gasPrice:Math.round(this.props.gwei * 1000000000)
         }
-        if(txData){
+        let callback = cb
+        if(typeof txData == "function"){
+          callback = txData
+        }else if(txData){
           paramsObject.data = txData
         }
 
@@ -65,7 +69,9 @@ class Transactions extends Component {
             if(this.state.config.DEBUG) console.log("Adding tx to list...")
             let currentTransactions = this.state.transactions
             currentTransactions.push({hash:transactionHash,time:Date.now(),addedFromCallback:1})
-            this.setState({transactions:currentTransactions})
+            let callbacks = this.state.callbacks
+            callbacks[transactionHash] = callback
+            this.setState({transactions:currentTransactions,callbacks:callbacks})
           }
         }).on('error',(err,receiptMaybe)=>{
           console.log("TX ERROR",err,receiptMaybe)
@@ -138,7 +144,7 @@ class Transactions extends Component {
   }
   checkTxs() {
     let {web3,block} = this.props
-    let {transactions,currentBlock} = this.state
+    let {transactions,currentBlock,callbacks} = this.state
 
     for(let t in transactions){
       if(!transactions[t].fullReceipt&&transactions[t].hash){
@@ -153,6 +159,9 @@ class Transactions extends Component {
                   currentTransactions[t].fullReceipt = receipt
                   if(typeof this.props.onReceipt =="function"){
                     this.props.onReceipt(currentTransactions[t],receipt)
+                    if(callbacks[currentTransactions[t].hash] && typeof callbacks[currentTransactions[t].hash] == "function"){
+                      callbacks[currentTransactions[t].hash](receipt)
+                    }
                   }
                 }
 
