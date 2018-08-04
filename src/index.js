@@ -6,6 +6,7 @@ import Events from "./events.js"
 import Scaler from "./scaler.js"
 import Blockie from "./blockie.js"
 import Address from "./address.js"
+import Button from "./button.js"
 
 module.exports['Gas']=Gas
 module.exports['Metamask']=Metamask
@@ -15,7 +16,7 @@ module.exports['Events']=Events
 module.exports['Scaler']=Scaler
 module.exports['Blockie']=Blockie
 module.exports['Address']=Address
-
+module.exports['Button']=Button
 /*
 export default {
   Gas: Gas,

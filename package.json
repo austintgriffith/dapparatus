@@ -39,6 +39,7 @@
     "babel-polyfill": "^6.0.16",
     "babel-preset-env": "^1.7.0",
     "babel-runtime": "^6.26.0",
+    "css-loader": "^1.0.0",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
     "url-loader": "^1.0.1"
