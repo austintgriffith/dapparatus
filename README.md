@@ -113,7 +113,7 @@ Listens for events and parses down the chain. Use an **id** field for unique key
 Scales components based on a target screen width vs actual screen width. Get your Dapp looking awesome on mobile.
 
 ```
-<Scaler config={{origin:"50px 50px",adjustedZoom:1.3}}>
+<Scaler config={{startZoomAt:1000,origin:"50px 50px",adjustedZoom:1.3}}>
   <img style={{position:"absolute",left:10,top:10,maxHeight:120,margin:10}} src={titleImage}/>
 </Scaler>
 ```
