@@ -14,6 +14,7 @@ defaultConfig.TIMETOKEEPTXSAROUND = 90000;
 defaultConfig.CHECKONTXS = 731;
 defaultConfig.GASLIMITMULTIPLIER = 1.2;
 defaultConfig.EXPECTEDPROGRESSBARVSAVGBLOCKTIME = 2.1;
+defaultConfig.DEFAULTGASLIMIT = 120000;
 
 class Transactions extends Component {
   constructor(props) {
@@ -35,11 +36,20 @@ class Transactions extends Component {
     this.props.onReady({
       tx: async (tx,maxGasLimit,txData,cb)=>{
         if(this.state.config.DEBUG) console.log("YOU WANT TO SEND TX ",tx,this.props.gwei)
+        let callback = cb
+
         let gasLimit
         try{
           gasLimit = Math.round((await tx.estimateGas()) * this.state.config.GASLIMITMULTIPLIER)
         }catch(e){
-          gasLimit = maxGasLimit
+          if(typeof maxGasLimit == "function"){
+            callback = maxGasLimit
+            gasLimit = this.state.DEFAULTGASLIMIT
+          }else if(maxGasLimit){
+            gasLimit = maxGasLimit
+          }else{
+            gasLimit = this.state.DEFAULTGASLIMIT
+          }
         }
 
         let paramsObject = {
@@ -47,7 +57,7 @@ class Transactions extends Component {
           gas:gasLimit,
           gasPrice:Math.round(this.props.gwei * 1000000000)
         }
-        let callback = cb
+
         if(typeof txData == "function"){
           callback = txData
         }else if(txData){
