@@ -95,6 +95,7 @@ Listens for events and parses down the chain. Use an **id** field for unique key
 
 ```
 <Events
+  config={{hide:false}}
   contract={contracts.Nifties}
   eventName={"Create"}
   block={block}
