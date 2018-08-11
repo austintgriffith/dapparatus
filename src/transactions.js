@@ -42,14 +42,15 @@ class Transactions extends Component {
         try{
           gasLimit = Math.round((await tx.estimateGas()) * this.state.config.GASLIMITMULTIPLIER)
         }catch(e){
-          if(typeof maxGasLimit == "function"){
-            callback = maxGasLimit
-            gasLimit = this.state.DEFAULTGASLIMIT
-          }else if(maxGasLimit){
+          if(typeof maxGasLimit != "function"){
             gasLimit = maxGasLimit
           }else{
             gasLimit = this.state.DEFAULTGASLIMIT
           }
+        }
+
+        if(typeof maxGasLimit == "function"){
+          callback = maxGasLimit
         }
 
         let paramsObject = {
@@ -155,13 +156,13 @@ class Transactions extends Component {
   checkTxs() {
     let {web3,block} = this.props
     let {transactions,currentBlock,callbacks} = this.state
-
+    if(this.state.config.DEBUG) console.log(" ~~ tx ~~ ")
     for(let t in transactions){
       if(!transactions[t].fullReceipt&&transactions[t].hash){
-        //.log("checking in on "+transactions[t].hash)
+        if(this.state.config.DEBUG) console.log(" ~~ tx ~~ checking in on "+transactions[t].hash)
         web3.eth.getTransactionReceipt(transactions[t].hash,(err,receipt)=>{
           if(receipt){
-            //console.log("GOT RECEPIT FOR ",transactions[t].hash)
+            if(this.state.config.DEBUG) console.log(" ~~ tx ~~ GOT RECEPIT FOR ",transactions[t].hash)
             let currentTransactions = this.state.transactions
             for(let t in currentTransactions){
               if(currentTransactions[t].hash == receipt.transactionHash){
