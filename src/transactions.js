@@ -167,12 +167,13 @@ class Transactions extends Component {
             for(let t in currentTransactions){
               if(currentTransactions[t].hash == receipt.transactionHash){
                 if(!currentTransactions[t].fullReceipt){
+                  if(this.state.config.DEBUG) console.log(" ~~ tx ~~ SETTING FULL RECEIPT ",transactions[t].hash)
                   currentTransactions[t].fullReceipt = receipt
                   if(typeof this.props.onReceipt =="function"){
                     this.props.onReceipt(currentTransactions[t],receipt)
-                    if(callbacks[currentTransactions[t].hash] && typeof callbacks[currentTransactions[t].hash] == "function"){
-                      callbacks[currentTransactions[t].hash](receipt)
-                    }
+                  }
+                  if(callbacks[currentTransactions[t].hash] && typeof callbacks[currentTransactions[t].hash] == "function"){
+                    callbacks[currentTransactions[t].hash](receipt)
                   }
                 }
 
