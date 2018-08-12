@@ -16,7 +16,7 @@ npm install --save dapparatus
 ## import
 
 ```
-import { Metamask, Gas, ContractLoader, Transactions, Events, Scaler } from "dapparatus"
+import { Metamask, Gas, ContractLoader, Transactions, Events, Scaler, Blockie, Address, Button } from "dapparatus"
 ```
 
 ## usage
