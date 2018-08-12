@@ -1,4 +1,4 @@
-# Dapparat.us
+# 📃Dapparat.us
 
 After building out a handful of Dapps in React, I decided to carve out all the common components and provide them in an NPM package.
 
