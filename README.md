@@ -108,6 +108,33 @@ Listens for events and parses down the chain. Use an **id** field for unique key
 />
 ```
 
+### Address
+
+Renders an address with the blockie (identicon) and the current balance in Eth. 
+
+```
+  <Address
+    {...this.state}
+    address={contracts.SomeContract._address}
+  />
+```
+
+### Button
+
+Renders a button
+
+```
+    <Button color={"green"} size={"2"} onClick={()=>{
+        //do some transaction on button click
+        tx(contracts.SomeContract.someFunction(someArgument),(receipt)=>{
+          //when the transaction goes through you'll have a receipt here
+        })
+      }}>
+      Send
+    </Button>
+```
+
+
 ### Scaler
 
 Scales components based on a target screen width vs actual screen width. Get your Dapp looking awesome on mobile.
