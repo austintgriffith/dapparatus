@@ -4,6 +4,8 @@ After building out a handful of Dapps in React, I decided to carve out all the c
 
 Should help get a Dapp up and running quickly so you can focus on your functionality, not wrestling with the blockchain and ethereum network.
 
+Watch the demo video using Dapparatus over in the [Clevis repo](https://github.com/austintgriffith/clevis).
+
 A good example and development walkthrough is
 [nifties-vs-nfties](https://github.com/austintgriffith/nifties-vs-nfties/blob/master/README.md).
 
