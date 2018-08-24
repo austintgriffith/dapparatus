@@ -1,8 +1,10 @@
-# Dapparat.us
+# 📃Dapparat.us
 
 After building out a handful of Dapps in React, I decided to carve out all the common components and provide them in an NPM package.
 
 Should help get a Dapp up and running quickly so you can focus on your functionality, not wrestling with the blockchain and ethereum network.
+
+Watch the demo video using Dapparatus over in the [Clevis repo](https://github.com/austintgriffith/clevis).
 
 A good example and development walkthrough is
 [nifties-vs-nfties](https://github.com/austintgriffith/nifties-vs-nfties/blob/master/README.md).
@@ -16,7 +18,7 @@ npm install --save dapparatus
 ## import
 
 ```
-import { Metamask, Gas, ContractLoader, Transactions, Events, Scaler } from "dapparatus"
+import { Metamask, Gas, ContractLoader, Transactions, Events, Scaler, Blockie, Address, Button } from "dapparatus"
 ```
 
 ## usage
@@ -95,6 +97,7 @@ Listens for events and parses down the chain. Use an **id** field for unique key
 
 ```
 <Events
+  config={{hide:false}}
   contract={contracts.Nifties}
   eventName={"Create"}
   block={block}
@@ -107,12 +110,39 @@ Listens for events and parses down the chain. Use an **id** field for unique key
 />
 ```
 
+### Address
+
+Renders an address with the blockie (identicon) and the current balance in Eth. 
+
+```
+  <Address
+    {...this.state}
+    address={contracts.SomeContract._address}
+  />
+```
+
+### Button
+
+Renders a button
+
+```
+    <Button color={"green"} size={"2"} onClick={()=>{
+        //do some transaction on button click
+        tx(contracts.SomeContract.someFunction(someArgument),(receipt)=>{
+          //when the transaction goes through you'll have a receipt here
+        })
+      }}>
+      Send
+    </Button>
+```
+
+
 ### Scaler
 
 Scales components based on a target screen width vs actual screen width. Get your Dapp looking awesome on mobile.
 
 ```
-<Scaler config={{origin:"50px 50px",adjustedZoom:1.3}}>
+<Scaler config={{startZoomAt:1000,origin:"50px 50px",adjustedZoom:1.3}}>
   <img style={{position:"absolute",left:10,top:10,maxHeight:120,margin:10}} src={titleImage}/>
 </Scaler>
 ```
