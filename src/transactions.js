@@ -4,6 +4,8 @@ import {Motion, spring, presets} from 'react-motion'
 import { Line, Circle } from 'rc-progress';
 import Scaler from "./scaler.js"
 import Web3 from 'web3';
+import { soliditySha3 } from 'web3-utils';
+import axios from 'axios';
 
 let interval
 
@@ -38,120 +40,190 @@ class Transactions extends Component {
         if(this.state.config.DEBUG) console.log("YOU WANT TO SEND TX ",tx,this.props.gwei)
         let callback = cb
 
-        let gasLimit
-        try{
-          gasLimit = Math.round((await tx.estimateGas()) * this.state.config.GASLIMITMULTIPLIER)
-        }catch(e){
-          if(typeof maxGasLimit != "function"){
-            gasLimit = maxGasLimit
-          }else{
-            gasLimit = this.state.DEFAULTGASLIMIT
-          }
-        }
+        if(this.props.metaAccount){
+          console.log("================&&&& metaAccount, send as metatx to relayer "+this.props.metatx.endpoint+" to contract :",this.props.metatx.contract)
+          var data = tx.encodeABI()
+          console.log("DATA",data)
+          console.log("tx",tx)
+          let minBlock = 0
+          let value = 0
+          this.sendMetaTx(this.props.metatx.contract,this.props.metaAccount.address,tx._parent._address,value,data,minBlock)
 
-        if(typeof maxGasLimit == "function"){
-          callback = maxGasLimit
-        }
 
-        let paramsObject = {
-          from: this.props.account,
-          gas:gasLimit,
-          gasPrice:Math.round(this.props.gwei * 1000000000)
-        }
-
-        if(typeof txData == "function"){
-          callback = txData
-        }else if(txData){
-          paramsObject.data = txData
-        }
-
-        if(this.state.config.DEBUG) console.log("gasLimit",gasLimit)
-        if(this.state.config.DEBUG) console.log("this.props.gwei",this.props.gwei)
-        tx.send(paramsObject,(error, transactionHash)=>{
-          if(this.state.config.DEBUG) console.log("TX CALLBACK",error,transactionHash)
-          let currentTransactions = this.state.transactions
-          let found = false
-          for(let t in currentTransactions){
-            if(currentTransactions[t].hash == transactionHash){
-              found = true
+        }else{
+          let gasLimit
+          try{
+            gasLimit = Math.round((await tx.estimateGas()) * this.state.config.GASLIMITMULTIPLIER)
+          }catch(e){
+            if(typeof maxGasLimit != "function"){
+              gasLimit = maxGasLimit
+            }else{
+              gasLimit = this.state.DEFAULTGASLIMIT
             }
           }
-          if(!found){
-            if(this.state.config.DEBUG) console.log("Adding tx to list...")
+
+          if(typeof maxGasLimit == "function"){
+            callback = maxGasLimit
+          }
+
+          let paramsObject = {
+            from: this.props.account,
+            gas:gasLimit,
+            gasPrice:Math.round(this.props.gwei * 1000000000)
+          }
+
+          if(typeof txData == "function"){
+            callback = txData
+          }else if(txData){
+            paramsObject.data = txData
+          }
+
+          if(this.state.config.DEBUG) console.log("gasLimit",gasLimit)
+          if(this.state.config.DEBUG) console.log("this.props.gwei",this.props.gwei)
+          tx.send(paramsObject,(error, transactionHash)=>{
+            if(this.state.config.DEBUG) console.log("TX CALLBACK",error,transactionHash)
             let currentTransactions = this.state.transactions
-            currentTransactions.push({hash:transactionHash,time:Date.now(),addedFromCallback:1})
-            let callbacks = this.state.callbacks
-            callbacks[transactionHash] = callback
-            this.setState({transactions:currentTransactions,callbacks:callbacks})
-          }
-        }).on('error',(err,receiptMaybe)=>{
-          console.log("TX ERROR",err,receiptMaybe)
-          let currentTransactions = this.state.transactions
-          for(let t in currentTransactions){
-            let errString = err.toString()
-            if(currentTransactions[t].hash&&errString.indexOf(currentTransactions[t].hash)>0){
-              //let outofgas = errString.indexOf("ran out of gas")
-              //if(outofgas>0){
-              //  currentTransactions[t].errorCode = 2
-              //}else{
-                currentTransactions[t].errorCode = 1
-              //}
+            let found = false
+            for(let t in currentTransactions){
+              if(currentTransactions[t].hash == transactionHash){
+                found = true
+              }
             }
-          }
-          this.setState({transactions:currentTransactions})
-        })
-        .on('transactionHash',(transactionHash)=>{
-          if(this.state.config.DEBUG) console.log("TX HASH",transactionHash)
-          let currentTransactions = this.state.transactions
-          let found = false
-          for(let t in currentTransactions){
-            if(currentTransactions[t].hash == transactionHash){
-              found = true
+            if(!found){
+              if(this.state.config.DEBUG) console.log("Adding tx to list...")
+              let currentTransactions = this.state.transactions
+              currentTransactions.push({hash:transactionHash,time:Date.now(),addedFromCallback:1})
+              let callbacks = this.state.callbacks
+              callbacks[transactionHash] = callback
+              this.setState({transactions:currentTransactions,callbacks:callbacks})
             }
-          }
-          if(!found){
-            if(this.state.config.DEBUG) console.log("Adding tx to list...")
+          }).on('error',(err,receiptMaybe)=>{
+            console.log("TX ERROR",err,receiptMaybe)
             let currentTransactions = this.state.transactions
-            currentTransactions.push({hash:transactionHash,time:Date.now(),addedFromTxHash:1})
+            for(let t in currentTransactions){
+              let errString = err.toString()
+              if(currentTransactions[t].hash&&errString.indexOf(currentTransactions[t].hash)>0){
+                //let outofgas = errString.indexOf("ran out of gas")
+                //if(outofgas>0){
+                //  currentTransactions[t].errorCode = 2
+                //}else{
+                  currentTransactions[t].errorCode = 1
+                //}
+              }
+            }
             this.setState({transactions:currentTransactions})
-          }
-        })
-        .on('receipt',(receipt)=>{
-          if(this.state.config.DEBUG) console.log("TX RECEIPT",receipt)
-          let currentTransactions = this.state.transactions
-          for(let t in currentTransactions){
-            if(currentTransactions[t].hash == receipt.transactionHash){
-              currentTransactions[t].receipt = 1
+          })
+          .on('transactionHash',(transactionHash)=>{
+            if(this.state.config.DEBUG) console.log("TX HASH",transactionHash)
+            let currentTransactions = this.state.transactions
+            let found = false
+            for(let t in currentTransactions){
+              if(currentTransactions[t].hash == transactionHash){
+                found = true
+              }
             }
-          }
-          this.setState({transactions:currentTransactions})
-        }).
-        on('confirmation', (confirmations,receipt)=>{
-          if(this.state.config.DEBUG) console.log("TX CONFIRM",confirmations,receipt)
-          let currentTransactions = this.state.transactions
-          for(let t in currentTransactions){
-            if(currentTransactions[t].hash == receipt.transactionHash){
-              if(!currentTransactions[t].confirmations) currentTransactions[t].confirmations=1
-              else currentTransactions[t].confirmations = currentTransactions[t].confirmations+1
+            if(!found){
+              if(this.state.config.DEBUG) console.log("Adding tx to list...")
+              let currentTransactions = this.state.transactions
+              currentTransactions.push({hash:transactionHash,time:Date.now(),addedFromTxHash:1})
+              this.setState({transactions:currentTransactions})
             }
-          }
-          this.setState({transactions:currentTransactions})
-        })
-        .then((receipt)=>{
-          if(this.state.config.DEBUG) console.log("TX THEN",receipt)
-          let currentTransactions = this.state.transactions
-          for(let t in currentTransactions){
-            if(currentTransactions[t].hash == receipt.transactionHash){
-              currentTransactions[t].then = 1
+          })
+          .on('receipt',(receipt)=>{
+            if(this.state.config.DEBUG) console.log("TX RECEIPT",receipt)
+            let currentTransactions = this.state.transactions
+            for(let t in currentTransactions){
+              if(currentTransactions[t].hash == receipt.transactionHash){
+                currentTransactions[t].receipt = 1
+              }
             }
-          }
-          this.setState({transactions:currentTransactions})
-        });
+            this.setState({transactions:currentTransactions})
+          }).
+          on('confirmation', (confirmations,receipt)=>{
+            if(this.state.config.DEBUG) console.log("TX CONFIRM",confirmations,receipt)
+            let currentTransactions = this.state.transactions
+            for(let t in currentTransactions){
+              if(currentTransactions[t].hash == receipt.transactionHash){
+                if(!currentTransactions[t].confirmations) currentTransactions[t].confirmations=1
+                else currentTransactions[t].confirmations = currentTransactions[t].confirmations+1
+              }
+            }
+            this.setState({transactions:currentTransactions})
+          })
+          .then((receipt)=>{
+            if(this.state.config.DEBUG) console.log("TX THEN",receipt)
+            let currentTransactions = this.state.transactions
+            for(let t in currentTransactions){
+              if(currentTransactions[t].hash == receipt.transactionHash){
+                currentTransactions[t].then = 1
+              }
+            }
+            this.setState({transactions:currentTransactions})
+          });
+        }
       }
     })
   }
   componentWillUnmount(){
     clearInterval(interval)
+  }
+  async sendMetaTx(proxyAddress,fromAddress,toAddress,value,txData,minBlock){
+    if(!minBlock) minBlock=0
+    let {metaContract,account,web3} = this.props
+    const nonce = await metaContract.nonce(fromAddress,minBlock).call()
+    console.log("Current nonce for "+fromAddress+" is ",nonce)
+    let rewardAddress = "0x0000000000000000000000000000000000000000"
+    let rewardAmount = 0
+    /*if(this.state.rewardTokenAddress){
+      if(this.state.rewardTokenAddress=="0"||this.state.rewardTokenAddress=="0x0000000000000000000000000000000000000000"){
+        rewardAddress = "0x0000000000000000000000000000000000000000"
+        this.setState({rewardTokenAddress:rewardAddress})
+        rewardAmount = web3.utils.toWei(this.state.rewardToken+"", 'ether')
+        console.log("rewardAmount",rewardAmount)
+      }else{
+        rewardAddress = this.state.rewardTokenAddress
+        rewardAmount = this.state.rewardToken
+      }
+    }*/
+
+    console.log("Reward: "+rewardAmount+" tokens at address "+rewardAddress)
+    const parts = [
+      proxyAddress,
+      fromAddress,
+      toAddress,
+      web3.utils.toTwosComplement(value),
+      txData,
+      rewardAddress,
+      web3.utils.toTwosComplement(rewardAmount),
+      web3.utils.toTwosComplement(minBlock),
+      web3.utils.toTwosComplement(nonce),
+    ]
+    console.log("PARTS",parts)
+    const hashOfMessage = soliditySha3(...parts);
+    const message = hashOfMessage
+    console.log("sign",message)
+    console.log(this.props.metaAccount.privateKey)
+    let sig = this.props.web3.eth.accounts.sign(message, this.props.metaAccount.privateKey);
+    //let sig = await this.props.web3.eth.personal.sign(""+message,account)
+    console.log("SIG",sig)
+    let postData = {
+      gas: this.state.gasLimit,
+      message: message,
+      parts:parts,
+      sig:sig.signature,
+    }
+
+
+    axios.post(this.props.metatx.endpoint+'tx', postData, {
+      headers: {
+          'Content-Type': 'application/json',
+      }
+    }).then((response)=>{
+      console.log("TX RESULT",response)
+    })
+    .catch((error)=>{
+      console.log(error);
+    });
   }
   checkTxs() {
     let {web3,block} = this.props
