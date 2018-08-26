@@ -29,7 +29,7 @@ class ContractLoader extends Component {
       if(customAddress){
         contractObject.address = customAddress
       }
-      if(DEBUG) console.log("ContractLoader - Loading ",contractName,contractObject.address)
+      if(DEBUG) console.log("ContractLoader - Loading ",contractName,contractObject)
       let contract = new this.props.web3.eth.Contract(contractObject.abi,contractObject.address)
       resultingContract = contract.methods
       resultingContract._blocknumber = contractObject.blocknumber

@@ -21,13 +21,20 @@ class Address extends Component {
     this.state = {
       etherscan:"",
       config: config,
+      ensName: "",
     }
   }
-  componentDidMount(){
+  async componentDidMount(){
     interval = setInterval(this.load.bind(this),this.state.config.POLLINTERVAL)
     this.load()
 
-    let ens = new ENS(this.props.web3.currentProvider);
+    let ens = new ENS(this.props.web3.currentProvider,"0xe7410170f87102df0055eb195163a03b7f2bff4a");//,"0xe7410170f87102df0055eb195163a03b7f2bff4a"
+
+    //let metatxrReverse = await ens.reverse("0xcfa240ec070e33611930b8fe3db74c8d7aad4592")
+    //console.log("metatxrReverse name",await metatxrReverse.name())
+    //console.log("metatxrReverse content",await metatxrReverse.content())
+    //console.log("metatxrReverse name",await metatxrReverse.name())
+
     if(this.state.config.DEBUG)console.log("attempting to ens reverse account....")
     try {
       var address = ens.reverse(this.props.address).name().catch((err)=>{
@@ -45,8 +52,10 @@ class Address extends Component {
   }
   load() {
     window.web3.eth.getBalance(this.props.address,(err,balance,e)=>{
-      balance=balance.toNumber()/1000000000000000000
-      this.setState({balance:balance})
+      if(balance){
+        balance=balance.toNumber()/1000000000000000000
+        this.setState({balance:balance})
+      }
     })
   }
   render(){
@@ -70,9 +79,23 @@ class Address extends Component {
          <span>
            <img style={{maxHeight:24,padding:2,verticalAlign:"middle",marginTop:-4}} src={eth}/>{balance}
          </span>
+
+
        </a>
+
       </div>
     )
   }
 }
 export default Address;
+/*
+<span onClick={()=>{
+  console.log("REVERSE REGISTER")
+  let ens = new ENS(this.props.web3.currentProvider,"0xe7410170f87102df0055eb195163a03b7f2bff4a");
+  ens.setOwner("0x72544a608fecf531d658fd6c7769462e7c4c6234cf07b41bee9ba80e1938a707",this.props.account.toLowerCase()).then((a,b)=>{
+    console.log("callback",a,b)
+  })
+}}>
+  R
+</span>
+ */

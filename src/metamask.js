@@ -131,15 +131,19 @@ class Metamask extends Component {
                       let ens = new ENS(window.web3.currentProvider);
                       if(this.state.config.DEBUG)console.log("attempting to ens reverse account....")
                       try {
-                        var address = ens.reverse(_accounts[0]).name().catch((err)=>{
-                          if(this.state.config.DEBUG) console.log("catch ens error (probably just didn't find it, ignore silently)")
-                        }).then((data) => {
-                           console.log("ENS data",data)
-                           if(data){
-                             this.setState({ens:data},()=>{this.props.onUpdate(this.state)})
-                           }
+                        let rev = ens.reverse(_accounts[0])
+                        if(rev){
+                          var address = rev.name().catch((err)=>{
+                            if(this.state.config.DEBUG) console.log("catch ens error (probably just didn't find it, ignore silently)")
+                          }).then((data) => {
+                             console.log("ENS data",data)
+                             if(data){
+                               this.setState({ens:data},()=>{this.props.onUpdate(this.state)})
+                             }
 
-                        });
+                          });
+                        }
+
                       }catch(e){}
 
                       let update = {
