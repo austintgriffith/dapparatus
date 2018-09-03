@@ -136,6 +136,17 @@ Renders a button
     </Button>
 ```
 
+### Blockie
+
+Renders an identicon for an address
+
+```
+    <Blockie 
+      address={someEthereumAddress.toLowerCase()} 
+      config={{size:3}}
+     />
+```
+
 
 ### Scaler
 
