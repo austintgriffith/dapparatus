@@ -36,20 +36,22 @@ class Transactions extends Component {
     interval = setInterval(this.checkTxs.bind(this),this.state.config.CHECKONTXS)
     this.checkTxs()
     this.props.onReady({
+      metatx: async (tx,maxGasLimit,txData,cb)=>{
+        if(this.state.config.DEBUG) console.log("YOU WANT TO SEND A META TX ",tx,this.props.gwei)
+        let callback = cb
+        let minBlock = 0
+        let value = 0
+        this.sendMetaTx(this.props.metatx.contract,this.props.metaAccount.address,tx._parent._address,value,tx.encodeABI(),minBlock)
+      },
       tx: async (tx,maxGasLimit,txData,cb)=>{
         if(this.state.config.DEBUG) console.log("YOU WANT TO SEND TX ",tx,this.props.gwei)
         let callback = cb
 
         if(this.props.metaAccount){
           console.log("================&&&& metaAccount, send as metatx to relayer "+this.props.metatx.endpoint+" to contract :",this.props.metatx.contract)
-          var data = tx.encodeABI()
-          console.log("DATA",data)
-          console.log("tx",tx)
           let minBlock = 0
           let value = 0
-          this.sendMetaTx(this.props.metatx.contract,this.props.metaAccount.address,tx._parent._address,value,data,minBlock)
-
-
+          this.sendMetaTx(this.props.metatx.contract,this.props.metaAccount.address,tx._parent._address,value,tx.encodeABI(),minBlock)
         }else{
           let gasLimit
           try{

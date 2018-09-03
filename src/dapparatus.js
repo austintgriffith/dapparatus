@@ -98,7 +98,7 @@ class Dapparatus extends Component {
     if(this.state.config.DEBUG) console.log("DAPPARATUS - checking state...")
     if (typeof window.web3 == 'undefined') {
       console.log("Connecting to infura...")
-      window.web3 = new Web3(new Web3.providers.HttpProvider('http://0.0.0.0:8545')) //CORS ISSUES!//
+      window.web3 = new Web3(this.props.fallbackWeb3Provider) //CORS ISSUES!//
       //window.web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws'))
     }
 

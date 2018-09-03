@@ -18,9 +18,17 @@ class Blockie extends Component {
     }
   }
   render() {
+
+    let address = this.props.address
+    if(address && typeof address == "string"){
+      address = address.toLowerCase()
+    }else{
+      address = "0x0000000000000000000000000000000000000000"
+    }
+
     return (
       <Blockies
-        seed={this.props.address.toLowerCase()}
+        seed={address}
         scale={this.state.config.size}
       />
     )

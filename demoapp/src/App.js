@@ -134,6 +134,7 @@ class App extends Component {
             requiredNetwork:['Unknown','Rinkeby'],
           }}
           metatx={METATX}
+          fallbackWeb3Provider={new Web3.providers.HttpProvider('http://0.0.0.0:8545')}
           onUpdate={(state)=>{
            console.log("metamask state update:",state)
            if(state.web3Provider) {
