@@ -100,7 +100,7 @@ Listens for events and parses down the chain. Use an **id** field for unique key
   config={{hide:false}}
   contract={contracts.Nifties}
   eventName={"Create"}
-  block={block}
+  block={block} <-------- current block number!
   id={"_id"}
   filter={{_owner:account}}
   onUpdate={(eventData,allEvents)=>{
