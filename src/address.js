@@ -9,10 +9,14 @@ let defaultConfig = {}
 defaultConfig.DEBUG = false;
 defaultConfig.POLLINTERVAL = 1337
 defaultConfig.showBalance = true
+defaultConfig.showBlockie = true
+defaultConfig.blockieSize = 2
+defaultConfig.showAddress = true
 defaultConfig.ETHPRECISION = 10000
 
 class Address extends Component {
   constructor(props) {
+    console.log("ADDRESS constructor",props)
     super(props);
     let config = defaultConfig
     if(props.config) {
@@ -23,6 +27,7 @@ class Address extends Component {
       config: config,
       ensName: "",
     }
+
   }
   async componentDidMount(){
     interval = setInterval(this.load.bind(this),this.state.config.POLLINTERVAL)
@@ -59,31 +64,41 @@ class Address extends Component {
     })
   }
   render(){
+
     let balance = ""
     if(this.state.config.showBalance){
-     balance = Math.round(this.state.balance*this.state.config.ETHPRECISION)/this.state.config.ETHPRECISION
+     balance = (
+       <span>
+        <img style={{maxHeight:24,padding:2,verticalAlign:"middle",marginTop:-4}} src={eth}/>{Math.round(this.state.balance*this.state.config.ETHPRECISION)/this.state.config.ETHPRECISION}
+       </span>
+     )
     }
 
     let displayName = this.props.address//.substr(0,this.state.config.accountCutoff)
     if(this.state.ens) displayName = this.state.ens
 
+    let blockie = ""
+    if(this.state.config.showBlockie){
+      blockie = (
+        <Blockie config={{size:this.state.config.blockieSize}} address={this.props.address.toLowerCase()}/>
+      )
+    }
+
+    let nameString = ""
+    if(this.state.config.showAddress){
+      nameString = (
+        <span style={{paddingLeft:7,paddingRight:2}}>
+         {displayName}
+        </span>
+      )
+    }
+
     return (
-      <div>
         <a target="_blank" href={this.props.etherscan+"address/"+this.props.address}>
-          <Blockie address={this.props.address.toLowerCase()}/>
-
-         <span style={{paddingLeft:7,paddingRight:2}}>
-           {displayName}
-         </span>
-
-         <span>
-           <img style={{maxHeight:24,padding:2,verticalAlign:"middle",marginTop:-4}} src={eth}/>{balance}
-         </span>
-
-
-       </a>
-
-      </div>
+          {blockie}
+          {nameString}
+          {balance}
+        </a>
     )
   }
 }
