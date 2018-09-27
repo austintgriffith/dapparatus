@@ -39,40 +39,43 @@ class Transactions extends Component {
       metatx: async (tx,maxGasLimit,txData,cb)=>{
         if(this.state.config.DEBUG) console.log("YOU WANT TO SEND A META TX ",tx,this.props.gwei)
         let callback = cb
-        let minBlock = 0
         let value = 0
-        this.sendMetaTx(this.props.metatx.contract,this.props.metaAccount.address,tx._parent._address,value,tx.encodeABI(),minBlock)
+        this.sendMetaTx(this.props.metatx.contract,this.props.metaAccount.address,tx._parent._address,value,tx.encodeABI())
       },
-      tx: async (tx,maxGasLimit,txData,cb)=>{
+      tx: async (tx,maxGasLimit,txData,value,cb)=>{
         if(this.state.config.DEBUG) console.log("YOU WANT TO SEND TX ",tx,this.props.gwei)
         let callback = cb
 
+        console.log("==MM meta:",this.props.metaAccount)
+
         if(this.props.metaAccount){
           console.log("================&&&& metaAccount, send as metatx to relayer "+this.props.metatx.endpoint+" to contract :",this.props.metatx.contract)
-          let minBlock = 0
-          let value = 0
-          this.sendMetaTx(this.props.metatx.contract,this.props.metaAccount.address,tx._parent._address,value,tx.encodeABI(),minBlock)
+          let _value = 0
+          this.sendMetaTx(this.props.metatx.contract,this.props.metaAccount.address,tx._parent._address,_value,tx.encodeABI())
         }else{
           let gasLimit
-          try{
-            gasLimit = Math.round((await tx.estimateGas()) * this.state.config.GASLIMITMULTIPLIER)
-          }catch(e){
-            if(typeof maxGasLimit != "function"){
-              gasLimit = maxGasLimit
-            }else{
+          if(typeof maxGasLimit != "function"){
+            gasLimit = maxGasLimit
+          }else{
+            try{
+              gasLimit = Math.round((await tx.estimateGas()) * this.state.config.GASLIMITMULTIPLIER)
+            }catch(e){
               gasLimit = this.state.DEFAULTGASLIMIT
             }
           }
-
           if(typeof maxGasLimit == "function"){
             callback = maxGasLimit
           }
 
+          if(!value) value=0
           let paramsObject = {
             from: this.props.account,
-            gas:gasLimit,
-            gasPrice:Math.round(this.props.gwei * 1000000000)
+            value: value,
+            gas: gasLimit,
+            gasPrice: Math.round(this.props.gwei * 1000000000)
           }
+
+          console.log("TX",paramsObject)
 
           if(typeof txData == "function"){
             callback = txData
@@ -169,10 +172,9 @@ class Transactions extends Component {
   componentWillUnmount(){
     clearInterval(interval)
   }
-  async sendMetaTx(proxyAddress,fromAddress,toAddress,value,txData,minBlock){
-    if(!minBlock) minBlock=0
+  async sendMetaTx(proxyAddress,fromAddress,toAddress,value,txData){
     let {metaContract,account,web3} = this.props
-    const nonce = await metaContract.nonce(fromAddress,minBlock).call()
+    const nonce = await metaContract.nonce(fromAddress).call()
     console.log("Current nonce for "+fromAddress+" is ",nonce)
     let rewardAddress = "0x0000000000000000000000000000000000000000"
     let rewardAmount = 0
@@ -189,6 +191,8 @@ class Transactions extends Component {
     }*/
 
     console.log("Reward: "+rewardAmount+" tokens at address "+rewardAddress)
+
+
     const parts = [
       proxyAddress,
       fromAddress,
@@ -197,7 +201,6 @@ class Transactions extends Component {
       txData,
       rewardAddress,
       web3.utils.toTwosComplement(rewardAmount),
-      web3.utils.toTwosComplement(minBlock),
       web3.utils.toTwosComplement(nonce),
     ]
     console.log("PARTS",parts)

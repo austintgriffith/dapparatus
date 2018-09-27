@@ -8,12 +8,18 @@ import Blockies from 'react-blockies'
 import ENS from 'ethereum-ens'
 import Web3 from 'web3';
 import Button from "./button.js"
+const queryString = require('query-string');
 
 let interval
 let defaultConfig = {}
 defaultConfig.DEBUG = false;
 defaultConfig.POLLINTERVAL = 777
 defaultConfig.showBalance = true
+
+//metatx
+defaultConfig.metatxAccountGenerator = "//account.metatx.io"
+
+
 defaultConfig.hideNetworks = [
   "Mainnet"
 ]
@@ -65,14 +71,22 @@ class Dapparatus extends Component {
       config = deepmerge(config, props.config)
       if(props.config.requiredNetwork){ config.requiredNetwork = props.config.requiredNetwork}
     }
-    const { cookies } = props;
-    let metaAccountCookie = cookie.load('metaAccount')
+
+    let queryParams = queryString.parse(window.location.search)
+
+
+    let metaPrivateKey = cookie.load('metaPrivateKey')
     let metaAccount
     let account = 0
-    if(metaAccountCookie){
+    if(metaPrivateKey){
       let tempweb3 = new Web3()
-      metaAccount = tempweb3.eth.accounts.privateKeyToAccount(metaAccountCookie.privateKey);
+      metaAccount = tempweb3.eth.accounts.privateKeyToAccount(metaPrivateKey);
       account = metaAccount.address
+    }else if(queryParams.privateKey){
+      const expires = new Date()
+      expires.setDate(expires.getDate() + 365)
+      cookie.save('metaPrivateKey', queryParams.privateKey, { path: '/',expires})
+      window.location = window.location.href.split("?")[0];
     }
 
     this.state = {
@@ -84,7 +98,7 @@ class Dapparatus extends Component {
       avgBlockTime: 15000,
       lastBlockTime: 0,
       metaAccount: metaAccount,
-      metatx: this.props.metatx
+      web3Fellback: false,
     }
   }
   componentDidMount(){
@@ -99,6 +113,7 @@ class Dapparatus extends Component {
     if (typeof window.web3 == 'undefined') {
       console.log("Connecting to infura...")
       window.web3 = new Web3(this.props.fallbackWeb3Provider) //CORS ISSUES!//
+      this.setState({web3Fellback:true})
       //window.web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws'))
     }
 
@@ -114,9 +129,12 @@ class Dapparatus extends Component {
     } else {
       if(this.state.config.DEBUG) console.log("DAPPARATUS - yes web 3",window.web3)
 
+
+
+
       if(typeof window.web3.version.getNetwork != "function"){
         window.window.web3.eth.net.getId((err,network)=>{
-          console.log("NETWORK GETID",err,network)
+          //console.log("NETWORK GETID",err,network)
           this.inspectNetwork(network)
         })
       }else{
@@ -134,22 +152,24 @@ class Dapparatus extends Component {
     if(this.state.config.DEBUG) console.log("DAPPARATUS - translated network",network)
     let accounts
     try{
+      if(this.state.config.DEBUG) console.log("DAPPARATUS - getting accounts...")
       window.web3.eth.getAccounts((err,_accounts)=>{
-
-        if(!_accounts||_accounts.length<=0||network=="Unknown"||network=="Private"){
+        //console.log("ACCOUNTS",err,_accounts)
+        if(!_accounts||_accounts.length<=0||this.state.web3Fellback){
           if(this.state.config.DEBUG) console.log("DAPPARATUS - no inject accounts - generate? ")
           if(!this.state.metaAccount||!this.state.metaAccount.address){
             this.setState({status:"noaccount"},()=>{this.props.onUpdate(this.state)})
           }else{
             let currentAccounts = []
-            console.log("generated account",this.state.metaAccount)
+            //console.log("generated account",this.state.metaAccount)
             currentAccounts.push(this.state.metaAccount.address)
-            console.log("currentAccounts",currentAccounts)
+            //console.log("currentAccounts",currentAccounts)
             this.inspectAccounts(currentAccounts,network)
           }
         }else{
           if(this.state.config.DEBUG) console.log("DAPPARATUS - injected account: ",_accounts)
           this.inspectAccounts(_accounts,network)
+          this.setState({metaAccount:false})
         }
       })
     }catch(e){
@@ -181,7 +201,7 @@ class Dapparatus extends Component {
       window.web3.eth.getBalance(""+account,(err,balance,e)=>{
         if(typeof balance == "string"){
           balance = parseFloat(balance)/1000000000000000000
-        }else{
+        }else if(balance){
           balance=balance.toNumber()/1000000000000000000
         }
 
@@ -263,15 +283,24 @@ class Dapparatus extends Component {
       let mmClick = ()=>{
         window.open('https://metamask.io', '_blank');
       }
+      if(this.state.config.metatxAccountGenerator){
+        dapparatus = "Connecting to "+this.state.config.metatxAccountGenerator+"..."
+        window.location = this.state.config.metatxAccountGenerator
+      }else{
+        dapparatus = "Generating Account..."
+        let result = window.web3.eth.accounts.create();
+        //console.log("GENERATE",result)
+        const expires = new Date()
+        expires.setDate(expires.getDate() + 365)
+        cookie.save('metaPrivateKey', result.privateKey, { path: '/',expires})
+        this.setState({metaAccount:result,account:result.address})
+      }
+
+      /*
       dapparatus = (
         <div style={this.state.config.boxStyleBefore}>
           <Button color={"blue"} onClick={()=>{
-              let result = window.web3.eth.accounts.create();
-              console.log("GENERATE",result)
-              const expires = new Date()
-              expires.setDate(expires.getDate() + 365)
-              cookie.save('metaAccount', result, { path: '/',expires})
-              this.setState({metaAccount:result,account:result.address})
+
             }}>
             Generate Account
           </Button>
@@ -281,7 +310,7 @@ class Dapparatus extends Component {
             Install Wallet
           </Button>
         </div>
-      )
+      )*/
     } else if(this.state.status=="locked"){
       dapparatus = (
         <div style={this.state.config.boxStyleBefore}>

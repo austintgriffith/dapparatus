@@ -58,7 +58,11 @@ class Address extends Component {
   load() {
     window.web3.eth.getBalance(this.props.address,(err,balance,e)=>{
       if(balance){
-        balance=balance.toNumber()/1000000000000000000
+        if(typeof balance == "string"){
+          balance = parseFloat(balance)/1000000000000000000
+        }else{
+          balance=balance.toNumber()/1000000000000000000
+        }
         this.setState({balance:balance})
       }
     })
