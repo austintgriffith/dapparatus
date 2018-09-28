@@ -26,6 +26,15 @@ import { Metamask, Gas, ContractLoader, Transactions, Events, Scaler, Blockie, A
 ### Dapparatus
 
 ```javascript
+
+const METATX = {
+  endpoint:"http://0.0.0.0:10001/",
+  contract:"0xf5bf6541843D2ba2865e9aeC153F28aaD96F6fbc",
+  //accountGenerator: "//account.metatx.io",
+}
+const WEB3_PROVIDER = 'http://0.0.0.0:8545'
+
+
 <Dapparatus
   config={{
     DEBUG:false,
