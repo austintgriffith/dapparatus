@@ -63,18 +63,17 @@ defaultConfig.requiredNetwork = [
   "Mainnet",
   "Unknown"//allow local RPC for testing
 ]
+
 class Dapparatus extends Component {
   constructor(props) {
     super(props);
     let config = defaultConfig
+
     if(props.config) {
       config = deepmerge(config, props.config)
       if(props.config.requiredNetwork){ config.requiredNetwork = props.config.requiredNetwork}
     }
-
     let queryParams = queryString.parse(window.location.search)
-
-
     let metaPrivateKey = cookie.load('metaPrivateKey')
     let metaAccount
     let account = 0
@@ -88,6 +87,8 @@ class Dapparatus extends Component {
       cookie.save('metaPrivateKey', queryParams.privateKey, { path: '/',expires})
       window.location = window.location.href.split("?")[0];
     }
+
+    console.log("!!!!~~~~~ ",config)
 
     this.state = {
       status:"loading",
@@ -128,10 +129,6 @@ class Dapparatus extends Component {
       }
     } else {
       if(this.state.config.DEBUG) console.log("DAPPARATUS - yes web 3",window.web3)
-
-
-
-
       if(typeof window.web3.version.getNetwork != "function"){
         window.window.web3.eth.net.getId((err,network)=>{
           //console.log("NETWORK GETID",err,network)
@@ -142,8 +139,6 @@ class Dapparatus extends Component {
           this.inspectNetwork(network)
         })
       }
-
-
     }
   }
   inspectNetwork(network){
@@ -362,7 +357,11 @@ class Dapparatus extends Component {
            }
 
            let displayName = this.state.account.substr(0,this.state.config.accountCutoff)
-           if(this.state.ens) displayName = this.state.ens
+           if(this.props.replaceName){
+             displayName = this.props.replaceName
+           }else if(this.state.ens){
+             displayName = this.state.ens
+           }
 
            dapparatus = (
              <div style={this.state.config.boxStyle}>

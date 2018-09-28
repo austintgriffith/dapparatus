@@ -18,6 +18,9 @@ defaultConfig.GASLIMITMULTIPLIER = 1.2;
 defaultConfig.EXPECTEDPROGRESSBARVSAVGBLOCKTIME = 2.1;
 defaultConfig.DEFAULTGASLIMIT = 120000;
 
+
+const METATXPOLL = 1777
+
 class Transactions extends Component {
   constructor(props) {
     super(props);
@@ -31,6 +34,48 @@ class Transactions extends Component {
       config: config,
       callbacks: {}
     }
+    if(props.metatx){
+      this.metaTxPoll()
+      setInterval(this.metaTxPoll.bind(this),METATXPOLL)
+    }
+  }
+  metaTxPoll(){
+    let metatxUrl = this.props.metatx.endpoint+'txs/'+this.props.account
+    axios.get(metatxUrl, {
+      headers: {
+          'Content-Type': 'application/json',
+      }
+    }).then((response)=>{
+      if(response&&response.data){
+        let currentTransactions = this.state.transactions
+        let callbacks = this.state.callbacks
+        let changed = false
+        for(let d in response.data){
+          let thisTransaction =  response.data[d]
+          let found = false
+          for(let t in currentTransactions){
+            if(currentTransactions[t].hash == thisTransaction.hash){
+              found = true
+            }
+          }
+          if(!found){
+            console.log("INCOMING META TX:",response.data[d])
+            changed=true
+            if(this.state.config.DEBUG) console.log("Adding tx to list...")
+            currentTransactions.push(thisTransaction)
+            callbacks[transactionHash] = ()=>{
+              console.log("META TX FINISHED",transactionHash)
+            }
+          }
+        }
+        if(changed){
+          this.setState({transactions:currentTransactions,callbacks:callbacks})
+        }
+      }
+    })
+    .catch((error)=>{
+      console.log(error);
+    });
   }
   componentDidMount(){
     interval = setInterval(this.checkTxs.bind(this),this.state.config.CHECKONTXS)
