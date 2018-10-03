@@ -5,13 +5,16 @@ import Web3 from 'web3';
 
 //requires some stuff to be installed:
 //  bouncer-proxy -> clevis test full
+//  mkdir ~/dapparatus/demoapp/src/contracts
 //  cp ~/bouncer-proxy/src/contracts/* ~/dapparatus/demoapp/src/contracts/
-//  cp ~/bouncer-proxy/Example/Example.address ~/dapparatus/demoapp/Example/
-//  clevis test publish
+//  mkdir ~/dapparatus/demoapp/Example
+//  cp ~/bouncer-proxy/Example/* ~/dapparatus/demoapp/Example/
+//  in demoapp: clevis test publish
 
 const METATX = {
   endpoint:"http://0.0.0.0:10001/",
-  contract:"0xf5bf6541843D2ba2865e9aeC153F28aaD96F6fbc"
+  contract:"0xf5bf6541843D2ba2865e9aeC153F28aaD96F6fbc",
+  //accountGenerator: "//account.metatx.io",
 }
 
 class App extends Component {
@@ -86,10 +89,10 @@ class App extends Component {
       connectedDisplay.push(
         <Transactions
           key="Transactions"
-          config={{DEBUG:true}}
+          config={{DEBUG:false}}
           metaAccount={this.state.metaAccount}
           metaContract={this.state.metaContract}
-          metatx={this.state.metatx}
+          metatx={METATX}
           account={account}
           gwei={gwei}
           web3={web3}
@@ -115,7 +118,7 @@ class App extends Component {
               {this.state.count}
             </div>
             <Button size="2" onClick={()=>{
-                tx(contracts.Example.addAmount(3),(receipt)=>{
+                tx(contracts.Example.addAmount(3),50000,(receipt)=>{
                   console.log("addAmount RESULT:",receipt)
                 })
               }}>
@@ -130,7 +133,7 @@ class App extends Component {
       <div className="App">
         <Dapparatus
           config={{
-            DEBUG:true,
+            DEBUG:false,
             requiredNetwork:['Unknown','Rinkeby'],
           }}
           metatx={METATX}
