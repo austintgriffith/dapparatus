@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import erc20 from '../assets/erc20.svg';
+import erc20 from './assets/erc20.png';
 
 const ERC20Icon = ({ tokenAddress, size, ...props }) => {
   return (

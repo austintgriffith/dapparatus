@@ -1,7 +1,7 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import QrReader from "react-qr-reader";
-import "./style.css";
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import QrReader from 'react-qr-reader';
+import './style.css';
 
 const CloseButton = () => (
   <div className="qrcode-scanner-close-button">
@@ -11,11 +11,20 @@ const CloseButton = () => (
 );
 
 class QRCodeScanner extends Component {
-  state = {
-    delay: 500
-  };
-  stopRecording = () => this.setState({ delay: false });
-  handleScan = data => {
+  constructor() {
+    super();
+    this.state = {
+      delay: 500
+    };
+    this.stopRecording.bind(this);
+    this.handleScan.bind(this);
+    this.handleError.bind(this);
+    this.onClose.bind(this);
+  }
+  stopRecording() {
+    this.setState({ delay: false });
+  }
+  handleScan(data) {
     if (data) {
       const validate = this.props.onValidate(data);
       if (validate.result) {
@@ -25,15 +34,15 @@ class QRCodeScanner extends Component {
         validate.onError();
       }
     }
-  };
-  handleError = error => {
+  }
+  handleError(error) {
     console.error(error);
     this.props.onError(error);
-  };
-  onClose = () => {
+  }
+  onClose() {
     this.stopRecording();
     this.props.onClose();
-  };
+  }
   componentWillUnmount() {
     this.stopRecording();
   }
@@ -46,7 +55,7 @@ class QRCodeScanner extends Component {
             delay={this.state.delay}
             onError={this.handleError}
             onScan={this.handleScan}
-            style={{ width: "100%" }}
+            style={{ width: '100%' }}
           />
         </div>
       </div>
