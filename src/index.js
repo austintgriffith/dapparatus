@@ -20,6 +20,7 @@ module.exports['Scaler']=Scaler
 module.exports['Blockie']=Blockie
 module.exports['Address']=Address
 module.exports['Button']=Button
+module.exports['QRCodeScanner']=QRCodeScanner
 
 module.exports['Dapparatus']=Dapparatus
 /*
