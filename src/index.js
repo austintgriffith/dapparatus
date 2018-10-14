@@ -1,14 +1,15 @@
-import Dapparatus from "./dapparatus.js"
-import Gas from "./gas.js"
-import Metamask from "./metamask.js"
-import Web3 from "./metamask.js"
-import Transactions from "./transactions.js"
-import ContractLoader from "./contractloader.js"
-import Events from "./events.js"
-import Scaler from "./scaler.js"
-import Blockie from "./blockie.js"
-import Address from "./address.js"
-import Button from "./button.js"
+import Dapparatus from "./dapparatus"
+import Gas from "./gas"
+import Metamask from "./metamask"
+import Web3 from "./metamask"
+import Transactions from "./transactions"
+import ContractLoader from "./contractloader"
+import Events from "./events"
+import Scaler from "./scaler"
+import Blockie from "./blockie"
+import Address from "./address"
+import Button from "./button"
+import QRCodeScanner from './qrcodescanner'
 
 module.exports['Gas']=Gas
 module.exports['Metamask']=Metamask
