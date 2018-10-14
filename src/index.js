@@ -12,24 +12,18 @@ import Button from './button';
 import QRCodeScanner from './qrcodescanner';
 import ERC20Icon from './erc20icon';
 
-module.exports['Gas'] = Gas;
-module.exports['Metamask'] = Metamask;
-module.exports['Transactions'] = Transactions;
-module.exports['ContractLoader'] = ContractLoader;
-module.exports['Events'] = Events;
-module.exports['Scaler'] = Scaler;
-module.exports['Blockie'] = Blockie;
-module.exports['Address'] = Address;
-module.exports['Button'] = Button;
-module.exports['QRCodeScanner'] = QRCodeScanner;
-module.exports['ERC20Icon'] = ERC20Icon;
-
-module.exports['Dapparatus'] = Dapparatus;
-/*
 export default {
-  Gas: Gas,
-  Metamask: Metamask,
-  Transactions: Transactions,
-  ContractLoader: ContractLoader,
-}
-*/
+  Dapparatus,
+  Gas,
+  Metamask,
+  Web3,
+  Transactions,
+  ContractLoader,
+  Events,
+  Scaler,
+  Blockie,
+  Address,
+  Button,
+  QRCodeScanner,
+  ERC20Icon
+};
