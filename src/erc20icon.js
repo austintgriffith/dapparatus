@@ -13,6 +13,7 @@ const ERC20Icon = ({ tokenAddress, size, ...props }) => {
           ? `https://raw.githubusercontent.com/TrustWallet/tokens/master/images/${tokenAddress}.png`
           : erc20
       }
+      alt={tokenAddress}
     />
   );
 };
