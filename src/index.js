@@ -10,6 +10,7 @@ import Blockie from './blockie';
 import Address from './address';
 import Button from './button';
 import QRCodeScanner from './qrcodescanner';
+import QRCodeDisplay from './qrcodedisplay';
 import ERC20Icon from './erc20icon';
 
 export default {
@@ -25,5 +26,6 @@ export default {
   Address,
   Button,
   QRCodeScanner,
+  QRCodeDisplay,
   ERC20Icon
 };
