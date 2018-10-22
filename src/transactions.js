@@ -176,30 +176,25 @@ class Transactions extends Component {
     console.log("Current nonce for "+fromAddress+" is ",nonce)
     let rewardAddress = "0x0000000000000000000000000000000000000000"
     let rewardAmount = 0
-    /*if(this.state.rewardTokenAddress){
-      if(this.state.rewardTokenAddress=="0"||this.state.rewardTokenAddress=="0x0000000000000000000000000000000000000000"){
-        rewardAddress = "0x0000000000000000000000000000000000000000"
-        this.setState({rewardTokenAddress:rewardAddress})
-        rewardAmount = web3.utils.toWei(this.state.rewardToken+"", 'ether')
-        console.log("rewardAmount",rewardAmount)
-      }else{
-        rewardAddress = this.state.rewardTokenAddress
-        rewardAmount = this.state.rewardToken
-      }
-    }*/
 
-    console.log("Reward: "+rewardAmount+" tokens at address "+rewardAddress)
-    const parts = [
-      proxyAddress,
-      fromAddress,
-      toAddress,
-      web3.utils.toTwosComplement(value),
-      txData,
-      rewardAddress,
-      web3.utils.toTwosComplement(rewardAmount),
-      web3.utils.toTwosComplement(minBlock),
-      web3.utils.toTwosComplement(nonce),
-    ]
+
+    let parts
+
+    if(typeof this.props.metaTxParts == "function"){
+      parts = this.props.metaTxParts(proxyAddress,fromAddress,toAddress,value,txData,nonce)
+    }else{
+      parts = [
+        proxyAddress,
+        fromAddress,
+        toAddress,
+        web3.utils.toTwosComplement(value),
+        txData,
+        rewardAddress,
+        web3.utils.toTwosComplement(rewardAmount),
+        web3.utils.toTwosComplement(nonce),
+      ]
+    }
+
     console.log("PARTS",parts)
     const hashOfMessage = soliditySha3(...parts);
     const message = hashOfMessage
