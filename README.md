@@ -23,11 +23,42 @@ import { Metamask, Gas, ContractLoader, Transactions, Events, Scaler, Blockie, A
 
 ## usage
 
+### Dapparatus
+
+```javascript
+
+const METATX = {
+  endpoint:"http://0.0.0.0:10001/",
+  contract:"0xf5bf6541843D2ba2865e9aeC153F28aaD96F6fbc",
+  //accountGenerator: "//account.metatx.io",
+}
+const WEB3_PROVIDER = 'http://0.0.0.0:8545'
+
+
+<Dapparatus
+  config={{
+    DEBUG:false,
+    requiredNetwork:['Unknown','Rinkeby'],
+  }}
+  replaceName={replaceName}
+  metatx={METATX}
+  fallbackWeb3Provider={new Web3.providers.HttpProvider(WEB3_PROVIDER)}
+  onUpdate={(state)=>{
+   console.log("metamask state update:",state)
+   if(state.web3Provider) {
+     state.web3 = new Web3(state.web3Provider)
+     this.setState(state)
+   }
+  }}
+/>
+```
+        
+
 ### Metamask
 
 Looks for injected web3 and provides an interface to the rest of the components. Also displays a nice HUD for users to see what account is logged in, what network they are on, and how much Ethereum they have. 
 
-```
+```javascript
 <Metamask
   /*config={{requiredNetwork:['Ropsten']}}*/
   onUpdate={(state)=>{
@@ -44,7 +75,7 @@ Looks for injected web3 and provides an interface to the rest of the components.
 
 Keeps track of the best gas price in gwei and delivers it to other components.
 
-```
+```javascript
 <Gas
   onUpdate={(state)=>{
     console.log("Gas price update:",state)
@@ -59,7 +90,7 @@ Keeps track of the best gas price in gwei and delivers it to other components.
 
 Displays transactions and blocks as progress bars and provides a **tx** function to make calling smart contract functions and sending transactions easier and more transparent to the user.
 
-```
+```javascript
 <Transactions
   account={account}
   gwei={gwei}
@@ -80,7 +111,7 @@ Displays transactions and blocks as progress bars and provides a **tx** function
 
 Loads your contracts published from [Clevis](https://github.com/austintgriffith/clevis) into **this.state.contracts**.
 
-```
+```javascript
 <ContractLoader
   web3={web3}
   require={path => {return require(`${__dirname}/${path}`)}}
@@ -95,7 +126,7 @@ Loads your contracts published from [Clevis](https://github.com/austintgriffith/
 
 Listens for events and parses down the chain. Use an **id** field for unique keys so it will only fire the **onUpdate** function when a new event is detected. Provide a **filter** object to filter indexed fields.
 
-```
+```javascript
 <Events
   config={{hide:false}}
   contract={contracts.Nifties}
@@ -114,7 +145,7 @@ Listens for events and parses down the chain. Use an **id** field for unique key
 
 Renders an address with the blockie (identicon) and the current balance in Eth. 
 
-```
+```javascript
   <Address
     {...this.state}
     address={contracts.SomeContract._address}
@@ -125,7 +156,7 @@ Renders an address with the blockie (identicon) and the current balance in Eth.
 
 Renders a button
 
-```
+```javascript
     <Button color={"green"} size={"2"} onClick={()=>{
         //do some transaction on button click
         tx(contracts.SomeContract.someFunction(someArgument),(receipt)=>{
@@ -140,7 +171,7 @@ Renders a button
 
 Renders an identicon for an address
 
-```
+```javascript
     <Blockie 
       address={someEthereumAddress.toLowerCase()} 
       config={{size:3}}
@@ -152,8 +183,16 @@ Renders an identicon for an address
 
 Scales components based on a target screen width vs actual screen width. Get your Dapp looking awesome on mobile.
 
-```
+```javascript
 <Scaler config={{startZoomAt:1000,origin:"50px 50px",adjustedZoom:1.3}}>
   <img style={{position:"absolute",left:10,top:10,maxHeight:120,margin:10}} src={titleImage}/>
 </Scaler>
 ```
+
+
+### Demo App
+
+Ether Jam Jam is a demo app I built that uses Dapparatus for meta transactions:
+
+[![etherjamjam](https://user-images.githubusercontent.com/2653167/46258946-4e6e0280-c48f-11e8-854d-261b9fd7d152.png)](https://youtu.be/cNcSXovVPdg)
+
