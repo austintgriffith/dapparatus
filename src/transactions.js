@@ -18,9 +18,6 @@ defaultConfig.GASLIMITMULTIPLIER = 1.2;
 defaultConfig.EXPECTEDPROGRESSBARVSAVGBLOCKTIME = 2.1;
 defaultConfig.DEFAULTGASLIMIT = 120000;
 
-
-const METATXPOLL = 1777
-
 class Transactions extends Component {
   constructor(props) {
     super(props);
@@ -34,48 +31,6 @@ class Transactions extends Component {
       config: config,
       callbacks: {}
     }
-    if(props.metatx){
-      this.metaTxPoll()
-      setInterval(this.metaTxPoll.bind(this),METATXPOLL)
-    }
-  }
-  metaTxPoll(){
-    let metatxUrl = this.props.metatx.endpoint+'txs/'+this.props.account
-    axios.get(metatxUrl, {
-      headers: {
-          'Content-Type': 'application/json',
-      }
-    }).then((response)=>{
-      if(response&&response.data){
-        let currentTransactions = this.state.transactions
-        let callbacks = this.state.callbacks
-        let changed = false
-        for(let d in response.data){
-          let thisTransaction =  response.data[d]
-          let found = false
-          for(let t in currentTransactions){
-            if(currentTransactions[t].hash == thisTransaction.hash){
-              found = true
-            }
-          }
-          if(!found){
-            console.log("INCOMING META TX:",response.data[d])
-            changed=true
-            if(this.state.config.DEBUG) console.log("Adding tx to list...")
-            currentTransactions.push(thisTransaction)
-            callbacks[transactionHash] = ()=>{
-              console.log("META TX FINISHED",transactionHash)
-            }
-          }
-        }
-        if(changed){
-          this.setState({transactions:currentTransactions,callbacks:callbacks})
-        }
-      }
-    })
-    .catch((error)=>{
-      console.log(error);
-    });
   }
   componentDidMount(){
     interval = setInterval(this.checkTxs.bind(this),this.state.config.CHECKONTXS)
@@ -223,31 +178,30 @@ class Transactions extends Component {
     console.log("Current nonce for "+fromAddress+" is ",nonce)
     let rewardAddress = "0x0000000000000000000000000000000000000000"
     let rewardAmount = 0
-    /*if(this.state.rewardTokenAddress){
-      if(this.state.rewardTokenAddress=="0"||this.state.rewardTokenAddress=="0x0000000000000000000000000000000000000000"){
-        rewardAddress = "0x0000000000000000000000000000000000000000"
-        this.setState({rewardTokenAddress:rewardAddress})
-        rewardAmount = web3.utils.toWei(this.state.rewardToken+"", 'ether')
-        console.log("rewardAmount",rewardAmount)
-      }else{
-        rewardAddress = this.state.rewardTokenAddress
-        rewardAmount = this.state.rewardToken
-      }
-    }*/
 
     console.log("Reward: "+rewardAmount+" tokens at address "+rewardAddress)
 
 
-    const parts = [
-      proxyAddress,
-      fromAddress,
-      toAddress,
-      web3.utils.toTwosComplement(value),
-      txData,
-      rewardAddress,
-      web3.utils.toTwosComplement(rewardAmount),
-      web3.utils.toTwosComplement(nonce),
-    ]
+
+    let parts
+
+    if(typeof this.props.metaTxParts == "function"){
+      parts = this.props.metaTxParts(proxyAddress,fromAddress,toAddress,value,txData,nonce)
+    }else{
+      parts = [
+        proxyAddress,
+        fromAddress,
+        toAddress,
+        web3.utils.toTwosComplement(value),
+        txData,
+        rewardAddress,
+        web3.utils.toTwosComplement(rewardAmount),
+        web3.utils.toTwosComplement(nonce),
+      ]
+    }
+
+
+
     console.log("PARTS",parts)
     const hashOfMessage = soliditySha3(...parts);
     const message = hashOfMessage
