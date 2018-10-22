@@ -4,9 +4,10 @@ import qrImage from 'qr-image';
 import './style.css';
 
 class QRCodeDisplay extends Component {
-  state = {
+  constructor() {
+    super();
     img: ''
-  };
+  }
 
   componentDidMount() {
     this.updateQRCodeImage();
@@ -26,14 +27,15 @@ class QRCodeDisplay extends Component {
       this.setState({ img });
     }
   }
-  render = () =>
-    this.state.img ? (
+  render() {
+    return this.state.img ? (
       <div
         className="qrcode-display-wrapper"
         dangerouslySetInnerHTML={{ __html: this.state.img }}
         {...this.props}
       />
     ) : null;
+  }
 }
 
 QRCodeDisplay.propTypes = {
