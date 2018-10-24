@@ -9,9 +9,9 @@ import Scaler from './scaler';
 import Blockie from './blockie';
 import Address from './address';
 import Button from './button';
-import QRCodeScanner from './qrcodescanner';
-import QRCodeDisplay from './qrcodedisplay';
-import ERC20Icon from './erc20icon';
+//import QRCodeScanner from './qrcodescanner';
+//import QRCodeDisplay from './qrcodedisplay';
+//import ERC20Icon from './erc20icon';
 
 /*
 export default {
@@ -31,6 +31,7 @@ export default {
   ERC20Icon
 };*/
 
+
 module.exports['Gas']=Gas
 module.exports['Metamask']=Metamask
 module.exports['Transactions']=Transactions
@@ -41,6 +42,6 @@ module.exports['Blockie']=Blockie
 module.exports['Address']=Address
 module.exports['Button']=Button
 module.exports['Dapparatus']=Dapparatus
-module.exports['QRCodeScanner']=QRCodeScanner
-module.exports['QRCodeDisplay']=QRCodeDisplay
-module.exports['ERC20Icon']=ERC20Icon
+//module.exports['QRCodeScanner']=QRCodeScanner
+//module.exports['QRCodeDisplay']=QRCodeDisplay
+//module.exports['ERC20Icon']=ERC20Icon

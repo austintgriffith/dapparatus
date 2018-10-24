@@ -63,8 +63,8 @@ class Transactions extends Component {
             changed=true
             if(this.state.config.DEBUG) console.log("Adding tx to list...")
             currentTransactions.push(thisTransaction)
-            callbacks[transactionHash] = ()=>{
-              console.log("META TX FINISHED",transactionHash)
+            callbacks[thisTransaction.hash] = ()=>{
+              console.log("META TX FINISHED",thisTransaction.hash)
             }
           }
         }
@@ -92,45 +92,46 @@ class Transactions extends Component {
         let callback = cb
 
         console.log("==MM meta:",this.props.metaAccount)
+        let gasLimit
+        if(typeof maxGasLimit != "function"){
+          gasLimit = maxGasLimit
+        }else{
+          try{
+            gasLimit = Math.round((await tx.estimateGas()) * this.state.config.GASLIMITMULTIPLIER)
+          }catch(e){
+            gasLimit = this.state.DEFAULTGASLIMIT
+          }
+        }
+        if(typeof maxGasLimit == "function"){
+          callback = maxGasLimit
+        }
+
+        if(!value) value=0
+        let paramsObject = {
+          from: this.props.account,
+          value: value,
+          gas: gasLimit,
+          gasPrice: Math.round(this.props.gwei * 1000000000)
+        }
+
+        console.log("TX",paramsObject)
+
+        if(typeof txData == "function"){
+          callback = txData
+        }else if(txData){
+          paramsObject.data = txData
+        }
 
         if(this.props.metaAccount){
           console.log("================&&&& metaAccount, send as metatx to relayer "+this.props.metatx.endpoint+" to contract :",this.props.metatx.contract)
           let _value = 0
-          this.sendMetaTx(this.props.metatx.contract,this.props.metaAccount.address,tx._parent._address,_value,tx.encodeABI())
+          this.sendMetaTx(this.props.metatx.contract,this.props.metaAccount.address,tx._parent._address,_value,tx.encodeABI(),callback)
         }else if(this.props.balance===0){
           console.log("================&&&& Etherless Account, send as metatx to relayer "+this.props.metatx.endpoint+" to contract :",this.props.metatx.contract)
           let _value = 0
-          this.sendMetaTx(this.props.metatx.contract,this.props.account,tx._parent._address,_value,tx.encodeABI())
+          this.sendMetaTx(this.props.metatx.contract,this.props.account,tx._parent._address,_value,tx.encodeABI(),callback)
         }else{
-          let gasLimit
-          if(typeof maxGasLimit != "function"){
-            gasLimit = maxGasLimit
-          }else{
-            try{
-              gasLimit = Math.round((await tx.estimateGas()) * this.state.config.GASLIMITMULTIPLIER)
-            }catch(e){
-              gasLimit = this.state.DEFAULTGASLIMIT
-            }
-          }
-          if(typeof maxGasLimit == "function"){
-            callback = maxGasLimit
-          }
 
-          if(!value) value=0
-          let paramsObject = {
-            from: this.props.account,
-            value: value,
-            gas: gasLimit,
-            gasPrice: Math.round(this.props.gwei * 1000000000)
-          }
-
-          console.log("TX",paramsObject)
-
-          if(typeof txData == "function"){
-            callback = txData
-          }else if(txData){
-            paramsObject.data = txData
-          }
 
           if(this.state.config.DEBUG) console.log("gasLimit",gasLimit)
           if(this.state.config.DEBUG) console.log("this.props.gwei",this.props.gwei)
@@ -221,7 +222,7 @@ class Transactions extends Component {
   componentWillUnmount(){
     clearInterval(interval)
   }
-  async sendMetaTx(proxyAddress,fromAddress,toAddress,value,txData){
+  async sendMetaTx(proxyAddress,fromAddress,toAddress,value,txData,callback){
     let {metaContract,account,web3} = this.props
     console.log("Loading nonce for ",fromAddress)
     const nonce = await metaContract.nonce(fromAddress).call()
@@ -276,7 +277,14 @@ class Transactions extends Component {
           'Content-Type': 'application/json',
       }
     }).then((response)=>{
-      console.log("TX RESULT",response)
+      console.log("TX RESULT",response.data.transactionHash)
+
+      let currentTransactions = this.state.transactions
+      currentTransactions.push({hash:response.data.transactionHash,time:Date.now(),addedFromCallback:1,metatx:true})
+      let callbacks = this.state.callbacks
+      callbacks[response.data.transactionHash] = callback
+      this.setState({transactions:currentTransactions,callbacks:callbacks})
+
     })
     .catch((error)=>{
       console.log(error);
@@ -295,6 +303,7 @@ class Transactions extends Component {
             let currentTransactions = this.state.transactions
             for(let t in currentTransactions){
               if(currentTransactions[t].hash == receipt.transactionHash){
+                if(this.state.config.DEBUG) console.log(" ~~ tx ~~ MATCHED")
                 if(!currentTransactions[t].fullReceipt){
                   if(this.state.config.DEBUG) console.log(" ~~ tx ~~ SETTING FULL RECEIPT ",transactions[t].hash)
                   currentTransactions[t].fullReceipt = receipt
@@ -303,6 +312,22 @@ class Transactions extends Component {
                   }
                   if(callbacks[currentTransactions[t].hash] && typeof callbacks[currentTransactions[t].hash] == "function"){
                     callbacks[currentTransactions[t].hash](receipt)
+                  }
+                  console.log("CHECKING META",currentTransactions[t])
+                  if(currentTransactions[t].metatx){
+                  let thisTxHash = receipt.transactionHash
+                  let age = Date.now()-currentTransactions[t].time
+                  console.log("WAITING ON ",thisTxHash,"with age",age)
+                  setTimeout(()=>{
+                    let currentTransactions = this.state.transactions
+                    for(let t in currentTransactions){
+                      if(currentTransactions[t].hash == thisTxHash){
+                        console.log("FOUND TX TO CLOSE")
+                        currentTransactions[t].closed=true
+                        this.setState({transactions:currentTransactions})
+                      }
+                    }
+                  },30000)
                   }
                 }
 
