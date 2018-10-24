@@ -97,6 +97,10 @@ class Transactions extends Component {
           console.log("================&&&& metaAccount, send as metatx to relayer "+this.props.metatx.endpoint+" to contract :",this.props.metatx.contract)
           let _value = 0
           this.sendMetaTx(this.props.metatx.contract,this.props.metaAccount.address,tx._parent._address,_value,tx.encodeABI())
+        }else if(this.props.balance===0){
+          console.log("================&&&& Etherless Account, send as metatx to relayer "+this.props.metatx.endpoint+" to contract :",this.props.metatx.contract)
+          let _value = 0
+          this.sendMetaTx(this.props.metatx.contract,this.props.account,tx._parent._address,_value,tx.encodeABI())
         }else{
           let gasLimit
           if(typeof maxGasLimit != "function"){
@@ -219,6 +223,7 @@ class Transactions extends Component {
   }
   async sendMetaTx(proxyAddress,fromAddress,toAddress,value,txData){
     let {metaContract,account,web3} = this.props
+    console.log("Loading nonce for ",fromAddress)
     const nonce = await metaContract.nonce(fromAddress).call()
     console.log("Current nonce for "+fromAddress+" is ",nonce)
     let rewardAddress = "0x0000000000000000000000000000000000000000"
@@ -246,15 +251,23 @@ class Transactions extends Component {
     const hashOfMessage = soliditySha3(...parts);
     const message = hashOfMessage
     console.log("sign",message)
-    console.log(this.props.metaAccount.privateKey)
-    let sig = this.props.web3.eth.accounts.sign(message, this.props.metaAccount.privateKey);
+    let sig
+    //sign using either the meta account OR the etherless account
+    if(this.props.metaAccount.privateKey){
+      console.log(this.props.metaAccount.privateKey)
+      sig = this.props.web3.eth.accounts.sign(message, this.props.metaAccount.privateKey);
+      sig = sig.signature
+    }else{
+      sig = await this.props.web3.eth.personal.sign(""+message,this.props.account)
+    }
+
     //let sig = await this.props.web3.eth.personal.sign(""+message,account)
     console.log("SIG",sig)
     let postData = {
       gas: this.state.gasLimit,
       message: message,
       parts:parts,
-      sig:sig.signature,
+      sig:sig,
     }
 
 
