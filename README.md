@@ -173,7 +173,7 @@ Renders an identicon for an address
 
 ```javascript
     <Blockie 
-      address={someEthereumAddress.toLowerCase()} 
+      address={someEthereumAddress} 
       config={{size:3}}
      />
 ```
