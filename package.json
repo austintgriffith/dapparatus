@@ -72,7 +72,7 @@
     "react-motion": "^0.5.2",
     "react-qr-reader": "^2.1.1",
     "react-scripts": "1.1.4",
-    "web3": "1.0.0-beta.33",
-    "web3-utils": "1.0.0-beta.33"
+    "web3": "1.0.0-beta.34",
+    "web3-utils": "1.0.0-beta.34"
   }
 }
