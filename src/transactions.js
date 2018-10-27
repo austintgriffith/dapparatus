@@ -216,6 +216,64 @@ class Transactions extends Component {
             this.setState({transactions:currentTransactions})
           });
         }
+      },
+      send: async (to,value,cb)=>{
+        let {metaContract,account,web3} = this.props
+
+        let weiValue =  this.props.web3.utils.toWei(""+value, 'ether')
+
+        let result
+        if(this.props.metaAccount){
+          console.log("sending with meta account:",this.props.metaAccount.address)
+          /*result = await this.props.web3.eth.sendTransaction({
+            from:this.props.metaAccount.address,
+            to:to,
+            value: weiValue,
+            gas: 30000,
+            gasPrice: Math.round(this.props.gwei * 1000000000)
+          })*/
+          let tx={
+            to:to,
+            value: weiValue,
+            gas: 30000,
+            gasPrice: Math.round(this.props.gwei * 1000000000)
+          }
+          this.props.web3.eth.accounts.signTransaction(tx, this.props.metaAccount.privateKey).then(signed => {
+              this.props.web3.eth.sendSignedTransaction(signed.rawTransaction).on('receipt', (receipt)=>{
+                console.log("META RECEIPT",receipt)
+                cb(receipt)
+              })
+          });
+          /*this.props.web3.eth.getTransactionCount(this.props.metaAccount.address, function (err, nonce) {
+            console.log("transaction count:",nonce)
+
+            var tx = new ethereumjs.Tx({
+              nonce: nonce,
+              gasPrice: this.props.web3.toHex(Math.round(this.props.gwei * 1000000000)),
+              gasLimit: 30000,
+              to: to,
+              value: weiValue
+            });
+            tx.sign(ethereumjs.Buffer.Buffer.from(privateKey, 'hex'));
+
+            var raw = '0x' + tx.serialize().toString('hex');
+            web3.eth.sendRawTransaction(raw, function (err, transactionHash) {
+              console.log(transactionHash);
+            });
+          });*/
+        }else{
+          console.log("sending with injected web3 account"),
+          result = await this.props.web3.eth.sendTransaction({
+            from:account,
+            to:to,
+            value: weiValue,
+            gas: 30000,
+            gasPrice: Math.round(this.props.gwei * 1000000000)
+          })
+        }
+
+        console.log("RESULT:",result)
+        cb(result)
       }
     })
   }
@@ -367,6 +425,9 @@ class Transactions extends Component {
 
   }
   render() {
+    if(this.state && this.state.config && this.state.config.hide){
+      return (<div></div>)
+    }
     let transactions = []
     this.state.transactions.map((transaction)=>{
       if(transaction.hash){
