@@ -40,7 +40,6 @@ const WEB3_PROVIDER = 'http://0.0.0.0:8545'
     DEBUG:false,
     requiredNetwork:['Unknown','Rinkeby'],
   }}
-  replaceName={replaceName}
   metatx={METATX}
   fallbackWeb3Provider={new Web3.providers.HttpProvider(WEB3_PROVIDER)}
   onUpdate={(state)=>{
