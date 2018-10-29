@@ -61,6 +61,18 @@ defaultConfig.requiredNetwork = [
   'Unknown' //allow local RPC for testing
 ];
 
+let burnMetaAccount = ()=>{
+  const expires = new Date();
+  expires.setDate(expires.getDate()-1);
+  cookie.save('metaPrivateKey', 0, {
+    path: '/',
+    expires: expires
+  });
+  setTimeout(()=>{
+    window.location = "/"
+  },1100)
+}
+
 class Dapparatus extends Component {
   constructor(props) {
     super(props);
@@ -101,6 +113,7 @@ class Dapparatus extends Component {
       avgBlockTime: 15000,
       lastBlockTime: 0,
       metaAccount: metaAccount,
+      burnMetaAccount: burnMetaAccount,
       web3Fellback: false
     };
   }
@@ -167,7 +180,25 @@ class Dapparatus extends Component {
             console.log('DAPPARATUS - no inject accounts - generate? ');
           if (!this.state.metaAccount || !this.state.metaAccount.address) {
             this.setState({ status: 'noaccount' }, () => {
-              this.props.onUpdate(this.state);
+              if (this.state.config.metatxAccountGenerator) {
+                console.log('Connecting to ' + this.state.config.metatxAccountGenerator + '...');
+                window.location = this.state.config.metatxAccountGenerator;
+              } else {
+                console.log("Generating account...")
+                let result = window.web3.eth.accounts.create();
+                //console.log("GENERATE",result)
+                const expires = new Date();
+                expires.setDate(expires.getDate() + 365);
+                cookie.save('metaPrivateKey', result.privateKey, {
+                  path: '/',
+                  expires
+                });
+
+                this.setState({ metaAccount: result, account: result.address, burnMetaAccount:burnMetaAccount },()=>{
+                  this.props.onUpdate(this.state);
+                });
+              }
+
             });
           } else {
             let currentAccounts = [];
@@ -325,22 +356,8 @@ class Dapparatus extends Component {
       let mmClick = () => {
         window.open('https://metamask.io', '_blank');
       };
-      if (this.state.config.metatxAccountGenerator) {
-        dapparatus =
-          'Connecting to ' + this.state.config.metatxAccountGenerator + '...';
-        window.location = this.state.config.metatxAccountGenerator;
-      } else {
         dapparatus = 'Generating Account...';
-        let result = window.web3.eth.accounts.create();
-        //console.log("GENERATE",result)
-        const expires = new Date();
-        expires.setDate(expires.getDate() + 365);
-        cookie.save('metaPrivateKey', result.privateKey, {
-          path: '/',
-          expires
-        });
-        this.setState({ metaAccount: result, account: result.address });
-      }
+
 
       /*
       dapparatus = (
