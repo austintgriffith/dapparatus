@@ -39,7 +39,7 @@ class Gas extends Component {
       })
       .then((response)=>{
         if(response && response.data.average>0&&response.data.average<200){
-          response.data.average=response.data.average*GASBOOSTPRICE
+          response.data.average=response.data.average + (response.data.average*GASBOOSTPRICE)
           let setMainGasTo = Math.round(response.data.average*100)/1000
           if(this.state.gwei!=setMainGasTo){
             let update = {gwei:setMainGasTo}
