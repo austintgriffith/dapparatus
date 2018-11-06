@@ -19,6 +19,8 @@ defaultConfig.showBalance = true;
 //metatx
 defaultConfig.metatxAccountGenerator = '//account.metatx.io';
 
+defaultConfig.onlyShowBlockie = false
+
 defaultConfig.hideNetworks = ['Mainnet'];
 defaultConfig.accountCutoff = 16;
 defaultConfig.outerBoxStyle = {
@@ -69,8 +71,8 @@ let burnMetaAccount = ()=>{
     expires: expires
   });
   setTimeout(()=>{
-    window.location = "/"
-  },1100)
+    window.location.reload(true);
+  },300)
 }
 
 class Dapparatus extends Component {
@@ -167,17 +169,14 @@ class Dapparatus extends Component {
   inspectNetwork(network) {
     if (this.state.config.DEBUG) console.log('DAPPARATUS - network', network);
     network = translateNetwork(network);
-    if (this.state.config.DEBUG)
-      console.log('DAPPARATUS - translated network', network);
+    if (this.state.config.DEBUG) console.log('DAPPARATUS - translated network', network);
     let accounts;
     try {
-      if (this.state.config.DEBUG)
-        console.log('DAPPARATUS - getting accounts...');
+      if (this.state.config.DEBUG) console.log('DAPPARATUS - getting accounts...');
       window.web3.eth.getAccounts((err, _accounts) => {
         //console.log("ACCOUNTS",err,_accounts)
         if (!_accounts || _accounts.length <= 0 || this.state.web3Fellback) {
-          if (this.state.config.DEBUG)
-            console.log('DAPPARATUS - no inject accounts - generate? ');
+          if (this.state.config.DEBUG) console.log('DAPPARATUS - no inject accounts - generate? ');
           if (!this.state.metaAccount || !this.state.metaAccount.address) {
             this.setState({ status: 'noaccount' }, () => {
               if (this.state.config.metatxAccountGenerator) {
@@ -193,7 +192,9 @@ class Dapparatus extends Component {
                   path: '/',
                   expires
                 });
-
+                setTimeout(()=>{
+                  window.location.reload(true);
+                },300)
                 this.setState({ metaAccount: result, account: result.address, burnMetaAccount:burnMetaAccount },()=>{
                   this.props.onUpdate(this.state);
                 });
@@ -206,6 +207,12 @@ class Dapparatus extends Component {
             currentAccounts.push(this.state.metaAccount.address);
             //console.log("currentAccounts",currentAccounts)
             this.inspectAccounts(currentAccounts, network);
+          }
+          if(this.state.metaAccount){
+            //console.log("metaAccount",this.state.metaAccount)
+            this.loadBlockBalanceAndName(this.state.metaAccount.address, network);
+          }else{
+            //console.lob("no metaAccount")
           }
         } else {
           if (this.state.config.DEBUG)
@@ -251,14 +258,18 @@ class Dapparatus extends Component {
     }
   }
   loadBlockBalanceAndName(account, network) {
+
+    if (this.state.config.DEBUG)  console.log("LOADING BALANCE...")
     window.web3.eth.getBlockNumber((err, block) => {
+      if (this.state.config.DEBUG)  console.log("BLOCK",err,block)
       window.web3.eth.getBalance('' + account, (err, balance, e) => {
+        if (this.state.config.DEBUG)  console.log("BALANCE",err,balance,e)
         if (typeof balance == 'string') {
           balance = parseFloat(balance) / 1000000000000000000;
         } else if (balance) {
           balance = balance.toNumber() / 1000000000000000000;
         }
-
+        //if (this.state.config.DEBUG) console.log("Adjusted balance",balance)
         let etherscan = 'https://etherscan.io/';
         if (network) {
           if (network == 'Unknown' || network == 'private') {
@@ -267,8 +278,10 @@ class Dapparatus extends Component {
             etherscan = 'https://' + network.toLowerCase() + '.etherscan.io/';
           }
         }
-        if (this.state.config.DEBUG)
-          console.log('DAPPARATUS - etherscan', etherscan);
+        if (this.state.config.DEBUG){
+            console.log('DAPPARATUS - etherscan', etherscan);
+        }
+
         if (
           this.state.status != 'ready' ||
           this.state.block != block ||
@@ -422,6 +435,9 @@ class Dapparatus extends Component {
       } else {
         let network = this.state.network;
         if (this.state.config.hideNetworks.indexOf(network) >= 0) network = '';
+
+
+
         let balance = '';
         if (this.state.config.showBalance) {
           balance =
@@ -439,30 +455,49 @@ class Dapparatus extends Component {
           displayName = this.state.ens;
         }
 
+
+        let textDisplay = (
+          <div>
+            <div>
+              <span style={this.state.config.textStyle}>{displayName}</span>
+            </div>
+            <div>
+              <span style={this.state.config.textStyle}>
+                {network}{' '}
+                <img
+                  style={{
+                    maxHeight: 24,
+                    padding: 2,
+                    verticalAlign: 'middle',
+                    marginTop: -4
+                  }}
+                  src={eth}
+                />
+                {balance}
+              </span>
+            </div>
+          </div>
+        )
+
+        if(this.props.customContent){
+          textDisplay = this.props.customContent()
+        }
+
+        if(this.state.config.onlyShowBlockie){
+          textDisplay = (
+            <div style={{height:60}}>
+
+            </div>
+          )
+        }
+
         dapparatus = (
           <div style={this.state.config.boxStyle}>
             <a
               target="_blank"
               href={this.state.etherscan + 'address/' + this.state.account}
             >
-              <div>
-                <span style={this.state.config.textStyle}>{displayName}</span>
-              </div>
-              <div>
-                <span style={this.state.config.textStyle}>
-                  {network}{' '}
-                  <img
-                    style={{
-                      maxHeight: 24,
-                      padding: 2,
-                      verticalAlign: 'middle',
-                      marginTop: -4
-                    }}
-                    src={eth}
-                  />
-                  {balance}
-                </span>
-              </div>
+              {textDisplay}
               <div
                 style={{
                   position: 'absolute',

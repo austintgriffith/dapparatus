@@ -107,14 +107,20 @@ class Transactions extends Component {
         }
 
         if(!value) value=0
+
+        let from = this.props.account
+        if(this.props.metaAccount) from = this.props.metaAccount.address
+
+
+
         let paramsObject = {
-          from: this.props.account,
+          from: from,
           value: value,
           gas: gasLimit,
           gasPrice: Math.round(this.props.gwei * 1000000000)
         }
 
-        console.log("TX",paramsObject)
+
 
         if(typeof txData == "function"){
           callback = txData
@@ -122,14 +128,28 @@ class Transactions extends Component {
           paramsObject.data = txData
         }
 
-        if(this.props.metaAccount){
-          console.log("================&&&& metaAccount, send as metatx to relayer "+this.props.metatx.endpoint+" to contract :",this.props.metatx.contract)
+        if(this.props.metaAccount&&this.props.metatx){
+          console.log("================&&&& metaAccount, send as metatx to relayer to contract :",this.props.metatx.contract)
           let _value = 0
           this.sendMetaTx(this.props.metatx.contract,this.props.metaAccount.address,tx._parent._address,_value,tx.encodeABI(),callback)
-        }else if(this.props.balance===0){
-          console.log("================&&&& Etherless Account, send as metatx to relayer "+this.props.metatx.endpoint+" to contract :",this.props.metatx.contract)
+        }else if(this.props.balance===0&&this.props.metatx){
+          console.log("================&&&& Etherless Account, send as metatx to relayer to contract :",this.props.metatx.contract)
           let _value = 0
           this.sendMetaTx(this.props.metatx.contract,this.props.account,tx._parent._address,_value,tx.encodeABI(),callback)
+        }else if(this.props.metaAccount){
+
+          console.log("Manually crafting... this might work...",tx,tx.arguments,tx.arguments[0].length)
+          paramsObject.to = tx._parent._address
+          paramsObject.data = tx.encodeABI()
+
+          console.log("TTTTTX",tx,paramsObject)
+
+          this.props.web3.eth.accounts.signTransaction(paramsObject, this.props.metaAccount.privateKey).then(signed => {
+              this.props.web3.eth.sendSignedTransaction(signed.rawTransaction).on('receipt', (receipt)=>{
+                console.log("META RECEIPT",receipt)
+                cb(receipt)
+              })
+          });
         }else{
 
 
@@ -244,23 +264,6 @@ class Transactions extends Component {
                 cb(receipt)
               })
           });
-          /*this.props.web3.eth.getTransactionCount(this.props.metaAccount.address, function (err, nonce) {
-            console.log("transaction count:",nonce)
-
-            var tx = new ethereumjs.Tx({
-              nonce: nonce,
-              gasPrice: this.props.web3.toHex(Math.round(this.props.gwei * 1000000000)),
-              gasLimit: 30000,
-              to: to,
-              value: weiValue
-            });
-            tx.sign(ethereumjs.Buffer.Buffer.from(privateKey, 'hex'));
-
-            var raw = '0x' + tx.serialize().toString('hex');
-            web3.eth.sendRawTransaction(raw, function (err, transactionHash) {
-              console.log(transactionHash);
-            });
-          });*/
         }else{
           console.log("sending with injected web3 account"),
           result = await this.props.web3.eth.sendTransaction({
@@ -373,19 +376,19 @@ class Transactions extends Component {
                   }
                   console.log("CHECKING META",currentTransactions[t])
                   if(currentTransactions[t].metatx){
-                  let thisTxHash = receipt.transactionHash
-                  let age = Date.now()-currentTransactions[t].time
-                  console.log("WAITING ON ",thisTxHash,"with age",age)
-                  setTimeout(()=>{
-                    let currentTransactions = this.state.transactions
-                    for(let t in currentTransactions){
-                      if(currentTransactions[t].hash == thisTxHash){
-                        console.log("FOUND TX TO CLOSE")
-                        currentTransactions[t].closed=true
-                        this.setState({transactions:currentTransactions})
+                    let thisTxHash = receipt.transactionHash
+                    let age = Date.now()-currentTransactions[t].time
+                    console.log("WAITING ON ",thisTxHash,"with age",age)
+                    setTimeout(()=>{
+                      let currentTransactions = this.state.transactions
+                      for(let t in currentTransactions){
+                        if(currentTransactions[t].hash == thisTxHash){
+                          console.log("FOUND TX TO CLOSE")
+                          currentTransactions[t].closed=true
+                          this.setState({transactions:currentTransactions})
+                        }
                       }
-                    }
-                  },30000)
+                    },30000)
                   }
                 }
 
