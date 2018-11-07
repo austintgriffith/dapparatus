@@ -97,7 +97,7 @@ class Dapparatus extends Component {
     } else if (queryParams.privateKey) {
       const expires = new Date();
       expires.setDate(expires.getDate() + 365);
-      cookie.save('metaPrivateKey', queryParams.privateKey, {
+      cookie.save('metaPrivateKey', queryParams.privateKey.toLowerCase(), {
         path: '/',
         expires
       });
@@ -188,7 +188,7 @@ class Dapparatus extends Component {
                 //console.log("GENERATE",result)
                 const expires = new Date();
                 expires.setDate(expires.getDate() + 365);
-                cookie.save('metaPrivateKey', result.privateKey, {
+                cookie.save('metaPrivateKey', result.privateKey.toLowerCase(), {
                   path: '/',
                   expires
                 });
