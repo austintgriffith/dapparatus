@@ -93,11 +93,11 @@ class Dapparatus extends Component {
     if (metaPrivateKey) {
       let tempweb3 = new Web3();
       metaAccount = tempweb3.eth.accounts.privateKeyToAccount(metaPrivateKey);
-      account = metaAccount.address;
+      account = metaAccount.address.toLowerCase();
     } else if (queryParams.privateKey) {
       const expires = new Date();
       expires.setDate(expires.getDate() + 365);
-      cookie.save('metaPrivateKey', queryParams.privateKey.toLowerCase(), {
+      cookie.save('metaPrivateKey', queryParams.privateKey, {
         path: '/',
         expires
       });
@@ -188,7 +188,7 @@ class Dapparatus extends Component {
                 //console.log("GENERATE",result)
                 const expires = new Date();
                 expires.setDate(expires.getDate() + 365);
-                cookie.save('metaPrivateKey', result.privateKey.toLowerCase(), {
+                cookie.save('metaPrivateKey', result.privateKey, {
                   path: '/',
                   expires
                 });
