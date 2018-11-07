@@ -104,7 +104,7 @@ class Dapparatus extends Component {
       window.location = window.location.href.split('?')[0];
     }
 
-    console.log('!!!!~~~~~ ', config);
+    console.log('!!!!DAPPARATUS~~~~~ ', config);
 
     this.state = {
       status: 'loading',
@@ -168,7 +168,15 @@ class Dapparatus extends Component {
   }
   inspectNetwork(network) {
     if (this.state.config.DEBUG) console.log('DAPPARATUS - network', network);
+    let networkNumber = network
     network = translateNetwork(network);
+    if(network=="Unknown"){
+      if(window.web3 && window.web3.currentProvider && window.web3.currentProvider.host && window.web3.currentProvider.host.indexOf("dai.poa.network")){
+        network="xDai"
+      }else if(window.web3 && window.web3.currentProvider && window.web3.currentProvider.host && window.web3.currentProvider.host.indexOf("poa.network")){
+        network="POA"
+      }
+    }
     if (this.state.config.DEBUG) console.log('DAPPARATUS - translated network', network);
     let accounts;
     try {
@@ -195,7 +203,7 @@ class Dapparatus extends Component {
                 setTimeout(()=>{
                   window.location.reload(true);
                 },300)
-                this.setState({ metaAccount: result, account: result.address, burnMetaAccount:burnMetaAccount },()=>{
+                this.setState({ metaAccount: result, account: result.address.toLowerCase(), burnMetaAccount:burnMetaAccount },()=>{
                   this.props.onUpdate(this.state);
                 });
               }
@@ -274,6 +282,10 @@ class Dapparatus extends Component {
         if (network) {
           if (network == 'Unknown' || network == 'private') {
             etherscan = 'http://localhost:8000/#/';
+          } else if (network == 'POA') {
+            etherscan = 'https://blockscout.com/poa/core/';
+          } else if (network == 'xDai') {
+            etherscan = 'https://blockscout.com/poa/dai/';
           } else if (network != 'Mainnet') {
             etherscan = 'https://' + network.toLowerCase() + '.etherscan.io/';
           }
@@ -323,7 +335,7 @@ class Dapparatus extends Component {
             network: network,
             web3Provider: window.web3.currentProvider,
             etherscan: etherscan,
-            account: account,
+            account: account.toLowerCase(),
             metaAccount: this.state.metaAccount
           };
           if (block != this.state.block) {
@@ -370,23 +382,6 @@ class Dapparatus extends Component {
         window.open('https://metamask.io', '_blank');
       };
         dapparatus = 'Generating Account...';
-
-
-      /*
-      dapparatus = (
-        <div style={this.state.config.boxStyleBefore}>
-          <Button color={"blue"} onClick={()=>{
-
-            }}>
-            Generate Account
-          </Button>
-          <Button color={"orange"} onClick={()=>{
-              alert("go to wallet offerings and educate")
-            }}>
-            Install Wallet
-          </Button>
-        </div>
-      )*/
     } else if (this.state.status == 'locked') {
       dapparatus = (
         <div style={this.state.config.boxStyleBefore}>
@@ -542,6 +537,10 @@ function translateNetwork(network) {
     return 'Rinkeby';
   } else if (network == 42) {
     return 'Kovan';
+  } else if (network == 99) {
+    return 'POA';
+  } else if (network == 100) {
+    return 'xDai';
   } else {
     return 'Unknown';
   }

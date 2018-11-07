@@ -2,12 +2,12 @@ var path = require('path');
 //needed to make async await work:
 require('babel-polyfill');
 module.exports = {
-  mode: 'production',
+  mode: 'development',
   entry: ['babel-polyfill', './src/index.js'],
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: 'index.js',
-    libraryTarget: 'commonjs2'
+    libraryTarget: 'umd'
   },
   module: {
     rules: [
@@ -40,6 +40,7 @@ module.exports = {
     ]
   },
   externals: {
-    react: 'commonjs react'
+    'react': 'react',
+    'react-dom': 'react-dom'
   }
 };
