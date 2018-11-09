@@ -69,7 +69,8 @@ class Metamask extends Component {
       etherscan: '',
       config: config,
       avgBlockTime: 15000,
-      lastBlockTime: 0
+      lastBlockTime: 0,
+      hasRequestedAccess: false
     };
   }
   componentDidMount() {
@@ -99,78 +100,93 @@ class Metamask extends Component {
       }
     } else {
       if (this.state.config.DEBUG) console.log('METAMASK - yes web 3');
-      window.web3.version.getNetwork((err, network) => {
-        if (this.state.config.DEBUG) console.log('METAMASK - network', network);
-        network = translateNetwork(network);
-        if (this.state.config.DEBUG)
+      if (!this.state.hasRequestedAccess) { // Prevent multiple prompts
+        if (this.state.config.DEBUG) console.log('METAMASK - requesting access from user...');
+        this.setState({ hasRequestedAccess: true},() => {
+          this.props.onUpdate(this.state);
+        });
+        try{
+          window.ethereum.enable();
+        } catch (e) {
+          console.log(e);
+          this.setState({ status: 'private', network: network },() => {
+            this.props.onUpdate(this.state);
+          });
+        }
+      }
+      else {
+        window.web3.version.getNetwork((err, network) => {
+          if (this.state.config.DEBUG) console.log('METAMASK - network', network);
+          network = translateNetwork(network);
+          if (this.state.config.DEBUG)
           console.log('METAMASK - translated network', network);
-        let accounts;
-        try {
-          window.web3.eth.getAccounts((err, _accounts) => {
-            if (this.state.config.DEBUG)
+          let accounts;
+          try {
+            window.web3.eth.getAccounts((err, _accounts) => {
+              if (this.state.config.DEBUG)
               console.log('METAMASK - accounts', _accounts);
-            if (
-              _accounts &&
-              this.state.account &&
-              this.state.account != _accounts[0]
-            ) {
-              window.location.reload(true);
-            }
-            if (err) {
-              console.log('metamask error', err);
-              if (this.state.status != 'error')
+              if (
+                _accounts &&
+                this.state.account &&
+                this.state.account != _accounts[0]
+              ) {
+                window.location.reload(true);
+              }
+              if (err) {
+                console.log('metamask error', err);
+                if (this.state.status != 'error')
                 this.setState({ status: 'error', network: network }, () => {
                   this.props.onUpdate(this.state);
                 });
-            } else {
-              if (!_accounts) {
-                if (this.state.status != 'error')
+              } else {
+                if (!_accounts) {
+                  if (this.state.status != 'error')
                   this.setState({ status: 'error', network: network }, () => {
                     this.props.onUpdate(this.state);
                   });
-              } else if (_accounts.length <= 0) {
-                if (this.state.status != 'locked')
+                } else if (_accounts.length <= 0) {
+                  if (this.state.status != 'locked')
                   this.setState({ status: 'locked', network: network }, () => {
                     this.props.onUpdate(this.state);
                   });
-              } else {
-                window.web3.eth.getBlockNumber((err, block) => {
-                  window.web3.eth.getBalance(
-                    '' + _accounts[0],
-                    (err, balance, e) => {
-                      balance = balance.toNumber() / 1000000000000000000;
-                      let etherscan = 'https://etherscan.io/';
-                      if (network) {
-                        if (network == 'Unknown' || network == 'private') {
-                          etherscan = 'http://localhost:8000/#/';
-                        } else if (network != 'Mainnet') {
-                          etherscan =
+                } else {
+                  window.web3.eth.getBlockNumber((err, block) => {
+                    window.web3.eth.getBalance(
+                      '' + _accounts[0],
+                      (err, balance, e) => {
+                        balance = balance.toNumber() / 1000000000000000000;
+                        let etherscan = 'https://etherscan.io/';
+                        if (network) {
+                          if (network == 'Unknown' || network == 'private') {
+                            etherscan = 'http://localhost:8000/#/';
+                          } else if (network != 'Mainnet') {
+                            etherscan =
                             'https://' +
                             network.toLowerCase() +
                             '.etherscan.io/';
+                          }
                         }
-                      }
-                      if (this.state.config.DEBUG)
-                        console.log('METAMASK - etherscan', etherscan);
-                      if (
-                        this.state.status != 'ready' ||
-                        this.state.block != block ||
-                        this.state.balance != balance
-                      ) {
-                        web3 = new Web3(window.web3.currentProvider);
-                        let ens = new ENS(window.web3.currentProvider);
                         if (this.state.config.DEBUG)
+                        console.log('METAMASK - etherscan', etherscan);
+                        if (
+                          this.state.status != 'ready' ||
+                          this.state.block != block ||
+                          this.state.balance != balance
+                        ) {
+                          web3 = new Web3(window.web3.currentProvider);
+                          let ens = new ENS(window.web3.currentProvider);
+                          if (this.state.config.DEBUG)
                           console.log('attempting to ens reverse account....');
-                        try {
-                          let rev = ens.reverse(_accounts[0]);
-                          if (rev) {
-                            var address = rev
+                          try {
+                            let rev = ens.reverse(_accounts[0]);
+                            if (rev) {
+                              var address = rev
                               .name()
                               .catch(err => {
                                 if (this.state.config.DEBUG)
-                                  console.log(
-                                    'catch ens error (probably just didn\'t find it, ignore silently)'
-                                  );
+                                console.log(
+                                  'catch ens error (probably just didn\'t find it, ignore silently)'
+                                );
                               })
                               .then(data => {
                                 console.log('ENS data', data);
@@ -180,45 +196,46 @@ class Metamask extends Component {
                                   });
                                 }
                               });
-                          }
-                        } catch (e) {}
+                            }
+                          } catch (e) {}
 
-                        let update = {
-                          status: 'ready',
-                          block: block,
-                          balance: balance,
-                          network: network,
-                          web3Provider: window.web3.currentProvider,
-                          etherscan: etherscan,
-                          account: _accounts[0]
-                        };
-                        if (block != this.state.block) {
-                          //block update
-                          if (this.state.lastBlockTime) {
-                            let timeItTook =
+                          let update = {
+                            status: 'ready',
+                            block: block,
+                            balance: balance,
+                            network: network,
+                            web3Provider: window.web3.currentProvider,
+                            etherscan: etherscan,
+                            account: _accounts[0]
+                          };
+                          if (block != this.state.block) {
+                            //block update
+                            if (this.state.lastBlockTime) {
+                              let timeItTook =
                               Date.now() - this.state.lastBlockTime;
-                            update.avgBlockTime = Math.round(
-                              (this.state.avgBlockTime * 4) / 5 + timeItTook / 5
-                            );
+                              update.avgBlockTime = Math.round(
+                                (this.state.avgBlockTime * 4) / 5 + timeItTook / 5
+                              );
+                            }
+                            update.lastBlockTime = Date.now();
                           }
-                          update.lastBlockTime = Date.now();
+                          this.setState(update, () => {
+                            this.props.onUpdate(this.state);
+                          });
                         }
-                        this.setState(update, () => {
-                          this.props.onUpdate(this.state);
-                        });
                       }
-                    }
-                  );
-                });
+                    );
+                  });
+                }
               }
-            }
-          });
-        } catch (e) {
-          console.log(e);
-          if (this.state.metamask != -1)
+            });
+          } catch (e) {
+            console.log(e);
+            if (this.state.metamask != -1)
             this.setState({ metamask: -1, network: network, web3: web3 });
-        }
-      });
+          }
+        });
+      }
     }
   }
   render() {
