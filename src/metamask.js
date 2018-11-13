@@ -49,8 +49,8 @@ defaultConfig.blockieStyle = {
   right: 15
 };
 defaultConfig.requiredNetwork = [
-  'Unknown', //allow local RPC for testing
-  'Mainnet'
+  'Mainnet',
+  'Unknown' //allow local RPC for testing
 ];
 class Metamask extends Component {
   constructor(props) {
@@ -283,7 +283,7 @@ class Metamask extends Component {
     } else if (this.state.status == 'ready') {
       let requiredNetworkText = '';
       for (let n in this.state.config.requiredNetwork) {
-        if (this.state.config.requiredNetwork[n] != 'Unknown') {
+        if (this.state.config.requiredNetwork[n] != 'Unknown' && this.state.config.requiredNetwork[n] != '') {
           if (requiredNetworkText != '') requiredNetworkText += 'or ';
           requiredNetworkText += this.state.config.requiredNetwork[n] + ' ';
         }
