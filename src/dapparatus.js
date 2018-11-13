@@ -59,8 +59,8 @@ defaultConfig.blockieStyle = {
   right: 15
 };
 defaultConfig.requiredNetwork = [
-  'Mainnet',
-  'Unknown' //allow local RPC for testing
+  'Unknown', //allow local RPC for testing
+  'Mainnet'
 ];
 
 let burnMetaAccount = ()=>{
@@ -82,7 +82,7 @@ class Dapparatus extends Component {
 
     if (props.config) {
       config = deepmerge(config, props.config);
-      if (props.config.requiredNetwork) {
+      if (props.config.requiredNetwork && props.config.requiredNetwork[0] != "") {
         config.requiredNetwork = props.config.requiredNetwork;
       }
     }
@@ -121,9 +121,10 @@ class Dapparatus extends Component {
   }
   componentDidUpdate() {
     if (this.props.config) {
+      const requiredNetwork = this.props.config.requiredNetwork;
       let config = this.state.config;
-      if (config.requiredNetwork != this.props.config.requiredNetwork){
-        config.requiredNetwork = this.props.config.requiredNetwork;
+      if (requiredNetwork && requiredNetwork[0] != "" && config.requiredNetwork != requiredNetwork){
+        config.requiredNetwork = requiredNetwork;
         this.setState({config: config});
       }
     }
