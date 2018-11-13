@@ -422,7 +422,7 @@ class Dapparatus extends Component {
           requiredNetworkText += this.state.config.requiredNetwork[n] + ' ';
         }
       }
-      if (
+      if (!this.state.metaAccount &&
         this.state.config.requiredNetwork &&
         this.state.config.requiredNetwork.indexOf(this.state.network) < 0
       ) {
