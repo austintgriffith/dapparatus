@@ -60,7 +60,6 @@ defaultConfig.blockieStyle = {
 };
 defaultConfig.requiredNetwork = [
   'Mainnet',
-  'xDai',
   'Unknown' //allow local RPC for testing
 ];
 
