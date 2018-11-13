@@ -72,6 +72,15 @@ class Metamask extends Component {
       lastBlockTime: 0
     };
   }
+  componentDidUpdate() {
+    if (this.props.config) {
+      let config = this.state.config;
+      if (config.requiredNetwork != this.props.config.requiredNetwork){
+        config.requiredNetwork = this.props.config.requiredNetwork;
+        this.setState({config: config});
+      }
+    }
+  }
   componentDidMount() {
     interval = setInterval(
       this.checkMetamask.bind(this),

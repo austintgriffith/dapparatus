@@ -119,6 +119,15 @@ class Dapparatus extends Component {
       web3Fellback: false
     };
   }
+  componentDidUpdate() {
+    if (this.props.config) {
+      let config = this.state.config;
+      if (config.requiredNetwork != this.props.config.requiredNetwork){
+        config.requiredNetwork = this.props.config.requiredNetwork;
+        this.setState({config: config});
+      }
+    }
+  }
   componentDidMount() {
     interval = setInterval(
       this.checkMetamask.bind(this),
