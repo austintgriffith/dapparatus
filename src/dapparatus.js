@@ -131,6 +131,17 @@ class Dapparatus extends Component {
   }
   checkMetamask() {
     if (this.state.config.DEBUG) console.log('DAPPARATUS - checking state...');
+    if (window.ethereum) {
+      window.web3 = new Web3(ethereum);
+      try {
+          // Request account access if needed
+          await ethereum.enable();
+          // Acccounts now exposed
+      } catch (error) {
+          // User denied account access...
+          console.log(error);
+      }
+    }
     if (typeof window.web3 == 'undefined') {
       console.log('Connecting to infura...');
       window.web3 = new Web3(this.props.fallbackWeb3Provider); //CORS ISSUES!//
