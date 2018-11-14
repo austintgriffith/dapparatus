@@ -367,7 +367,10 @@ class Dapparatus extends Component {
   }
   render() {
     let dapparatus = 'loading.';
-    if (this.state.status == 'loading') {
+    if (this.props.config.hide) {
+      dapparatus = [];
+    }
+    else if (this.state.status == 'loading') {
       dapparatus = (
         <a target="_blank" href="https://metamask.io/">
           <span style={this.state.config.textStyle}>loading...</span>
