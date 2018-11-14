@@ -58,7 +58,7 @@ class Metamask extends Component {
     let config = defaultConfig;
     if (props.config) {
       config = deepmerge(config, props.config);
-      if (props.config.requiredNetwork) {
+      if (props.config.requiredNetwork && props.config.requiredNetwork[0] != "") {
         config.requiredNetwork = props.config.requiredNetwork;
       }
     }
@@ -71,6 +71,16 @@ class Metamask extends Component {
       avgBlockTime: 15000,
       lastBlockTime: 0
     };
+  }
+  componentDidUpdate() {
+    if (this.props.config) {
+      const requiredNetwork = this.props.config.requiredNetwork;
+      let config = this.state.config;
+      if (requiredNetwork && requiredNetwork[0] != "" && config.requiredNetwork != requiredNetwork){
+        config.requiredNetwork = requiredNetwork;
+        this.setState({config: config});
+      }
+    }
   }
   componentDidMount() {
     interval = setInterval(
@@ -273,7 +283,7 @@ class Metamask extends Component {
     } else if (this.state.status == 'ready') {
       let requiredNetworkText = '';
       for (let n in this.state.config.requiredNetwork) {
-        if (this.state.config.requiredNetwork[n] != 'Unknown') {
+        if (this.state.config.requiredNetwork[n] != 'Unknown' && this.state.config.requiredNetwork[n] != '') {
           if (requiredNetworkText != '') requiredNetworkText += 'or ';
           requiredNetworkText += this.state.config.requiredNetwork[n] + ' ';
         }
