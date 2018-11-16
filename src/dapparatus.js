@@ -116,7 +116,8 @@ class Dapparatus extends Component {
       lastBlockTime: 0,
       metaAccount: metaAccount,
       burnMetaAccount: burnMetaAccount,
-      web3Fellback: false
+      web3Fellback: false,
+      hasRequestedAccess: false
     };
   }
   componentDidUpdate() {
@@ -162,8 +163,9 @@ class Dapparatus extends Component {
         });
       }
     } else {
-      if (this.state.config.DEBUG)
+      if (this.state.config.DEBUG) {
         console.log('DAPPARATUS - yes web 3', window.web3);
+      }
       if (typeof window.web3.version.getNetwork != 'function') {
         window.window.web3.eth.net.getId((err, network) => {
           //console.log("NETWORK GETID",err,network)
@@ -194,6 +196,22 @@ class Dapparatus extends Component {
       window.web3.eth.getAccounts((err, _accounts) => {
         //console.log("ACCOUNTS",err,_accounts)
         if (!_accounts || _accounts.length <= 0 || this.state.web3Fellback) {
+          if (!this.state.hasRequestedAccess) { // Prevent multiple prompts
+            if (this.state.config.DEBUG) console.log('METAMASK - requesting access from user...');
+            this.setState({ hasRequestedAccess: true},() => {
+              this.props.onUpdate(this.state);
+            });
+            try{
+              window.ethereum.enable().then(() => {
+                 window.location.reload(true);
+              })
+            } catch (e) {
+              console.log(e);
+              this.setState({ status: 'private', network: network },() => {
+                this.props.onUpdate(this.state);
+              });
+            }
+          }
           if (this.state.config.DEBUG) console.log('DAPPARATUS - no inject accounts - generate? ');
           if (!this.state.metaAccount || !this.state.metaAccount.address) {
             this.setState({ status: 'noaccount' }, () => {
@@ -257,7 +275,7 @@ class Dapparatus extends Component {
         //window.location.reload(true);
         console.log('RELOAD BECAUSE LOST ACCOUNTS?');
       } else if (this.state.account != currentAccounts[0].toLowerCase()) {
-        //window.location.reload(true);
+        // window.location.reload(true);
         console.log('RELOAD BECAUSE DIFFERENT ACCOUNTS?');
       }
     }
