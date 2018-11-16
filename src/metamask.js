@@ -233,7 +233,10 @@ class Metamask extends Component {
   }
   render() {
     let metamask = 'loading.';
-    if (this.state.status == 'loading') {
+    if (this.props.config.hide) {
+      metamask = [];
+    }
+    else if (this.state.status == 'loading') {
       metamask = (
         <a target="_blank" href="https://metamask.io/">
           <span style={this.state.config.textStyle}>loading...</span>

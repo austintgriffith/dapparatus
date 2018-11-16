@@ -39,6 +39,7 @@ const WEB3_PROVIDER = 'http://0.0.0.0:8545'
   config={{
     DEBUG:false,
     requiredNetwork:['Unknown','Rinkeby'],
+    hide:false
   }}
   metatx={METATX}
   fallbackWeb3Provider={new Web3.providers.HttpProvider(WEB3_PROVIDER)}
@@ -59,7 +60,7 @@ Looks for injected web3 and provides an interface to the rest of the components.
 
 ```javascript
 <Metamask
-  /*config={{DEBUG: false, requiredNetwork:['Ropsten']}}*/
+  /*config={{DEBUG: false, requiredNetwork:['Ropsten'], hide:false}}*/
   onUpdate={(state)=>{
     console.log("metamask state update:",state)
     if(state.web3Provider) {
@@ -109,6 +110,8 @@ Displays transactions and blocks as progress bars and provides a **tx** function
 ## ContractLoader
 
 Loads your contracts published from [Clevis](https://github.com/austintgriffith/clevis) into **this.state.contracts**.
+
+Note: Contracts must first be injected into the /src folder by running `clevis test publish` or `clevis test full`.
 
 ```javascript
 <ContractLoader
