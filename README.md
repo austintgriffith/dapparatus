@@ -115,13 +115,25 @@ Note: Contracts must first be injected into the /src folder by running `clevis t
 
 ```javascript
 <ContractLoader
-  web3={web3}
-  require={path => {return require(`${__dirname}/${path}`)}}
-  onReady={(contracts)=>{
-    console.log("contracts loaded",contracts)
-    this.setState({contracts:contracts})
-  }}
+ key="ContractLoader"
+ config={{DEBUG:true}}
+ web3={web3}
+ require={path => {return require(`${__dirname}/${path}`)}}
+ onReady={(contracts,customLoader)=>{
+   console.log("contracts loaded",contracts)
+   this.setState({
+     customLoader: customLoader,
+     contracts:contracts,
+   },()=>{
+     console.log("Contracts Are Ready:",this.state.contracts)
+   })
+ }}
 />
+```
+
+You can then use the customLoader to load dynamic contracts using the ABI from current contracts:
+```javascript
+let lootTokenContract = this.state.customLoader("LootToken",lootTokenAddress)
 ```
 
 ### Events

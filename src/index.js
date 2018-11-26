@@ -1,3 +1,5 @@
+import 'idempotent-babel-polyfill';
+
 import Dapparatus from './dapparatus';
 import Gas from './gas';
 import Metamask from './metamask';
@@ -31,17 +33,16 @@ export default {
   ERC20Icon
 };*/
 
-
-module.exports['Gas']=Gas
-module.exports['Metamask']=Metamask
-module.exports['Transactions']=Transactions
-module.exports['ContractLoader']=ContractLoader
-module.exports['Events']=Events
-module.exports['Scaler']=Scaler
-module.exports['Blockie']=Blockie
-module.exports['Address']=Address
-module.exports['Button']=Button
-module.exports['Dapparatus']=Dapparatus
-module.exports['QRCodeScanner']=QRCodeScanner
-module.exports['QRCodeDisplay']=QRCodeDisplay
-module.exports['ERC20Icon']=ERC20Icon
+module.exports['Gas'] = Gas;
+module.exports['Metamask'] = Metamask;
+module.exports['Transactions'] = Transactions;
+module.exports['ContractLoader'] = ContractLoader;
+module.exports['Events'] = Events;
+module.exports['Scaler'] = Scaler;
+module.exports['Blockie'] = Blockie;
+module.exports['Address'] = Address;
+module.exports['Button'] = Button;
+module.exports['Dapparatus'] = Dapparatus;
+module.exports['QRCodeScanner'] = QRCodeScanner;
+module.exports['QRCodeDisplay'] = QRCodeDisplay;
+module.exports['ERC20Icon'] = ERC20Icon;
