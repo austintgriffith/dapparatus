@@ -39,8 +39,8 @@ const WEB3_PROVIDER = 'http://0.0.0.0:8545'
   config={{
     DEBUG:false,
     requiredNetwork:['Unknown','Rinkeby'],
+    hide:false
   }}
-  replaceName={replaceName}
   metatx={METATX}
   fallbackWeb3Provider={new Web3.providers.HttpProvider(WEB3_PROVIDER)}
   onUpdate={(state)=>{
@@ -52,15 +52,15 @@ const WEB3_PROVIDER = 'http://0.0.0.0:8545'
   }}
 />
 ```
-        
+
 
 ### Metamask
 
-Looks for injected web3 and provides an interface to the rest of the components. Also displays a nice HUD for users to see what account is logged in, what network they are on, and how much Ethereum they have. 
+Looks for injected web3 and provides an interface to the rest of the components. Also displays a nice HUD for users to see what account is logged in, what network they are on, and how much Ethereum they have.
 
 ```javascript
 <Metamask
-  /*config={{requiredNetwork:['Ropsten']}}*/
+  /*config={{DEBUG: false, requiredNetwork:['Ropsten'], hide:false}}*/
   onUpdate={(state)=>{
     console.log("metamask state update:",state)
     if(state.web3Provider) {
@@ -111,15 +111,29 @@ Displays transactions and blocks as progress bars and provides a **tx** function
 
 Loads your contracts published from [Clevis](https://github.com/austintgriffith/clevis) into **this.state.contracts**.
 
+Note: Contracts must first be injected into the /src folder by running `clevis test publish` or `clevis test full`.
+
 ```javascript
 <ContractLoader
-  web3={web3}
-  require={path => {return require(`${__dirname}/${path}`)}}
-  onReady={(contracts)=>{
-    console.log("contracts loaded",contracts)
-    this.setState({contracts:contracts})
-  }}
+ key="ContractLoader"
+ config={{DEBUG:true}}
+ web3={web3}
+ require={path => {return require(`${__dirname}/${path}`)}}
+ onReady={(contracts,customLoader)=>{
+   console.log("contracts loaded",contracts)
+   this.setState({
+     customLoader: customLoader,
+     contracts:contracts,
+   },()=>{
+     console.log("Contracts Are Ready:",this.state.contracts)
+   })
+ }}
 />
+```
+
+You can then use the customLoader to load dynamic contracts using the ABI from current contracts:
+```javascript
+let lootTokenContract = this.state.customLoader("LootToken",lootTokenAddress)
 ```
 
 ### Events
@@ -143,7 +157,7 @@ Listens for events and parses down the chain. Use an **id** field for unique key
 
 ### Address
 
-Renders an address with the blockie (identicon) and the current balance in Eth. 
+Renders an address with the blockie (identicon) and the current balance in Eth.
 
 ```javascript
   <Address
@@ -172,8 +186,8 @@ Renders a button
 Renders an identicon for an address
 
 ```javascript
-    <Blockie 
-      address={someEthereumAddress.toLowerCase()} 
+    <Blockie
+      address={someEthereumAddress}
       config={{size:3}}
      />
 ```
@@ -195,4 +209,3 @@ Scales components based on a target screen width vs actual screen width. Get you
 Ether Jam Jam is a demo app I built that uses Dapparatus for meta transactions:
 
 [![etherjamjam](https://user-images.githubusercontent.com/2653167/46258946-4e6e0280-c48f-11e8-854d-261b9fd7d152.png)](https://youtu.be/cNcSXovVPdg)
-

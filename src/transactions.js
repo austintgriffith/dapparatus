@@ -63,8 +63,8 @@ class Transactions extends Component {
             changed=true
             if(this.state.config.DEBUG) console.log("Adding tx to list...")
             currentTransactions.push(thisTransaction)
-            callbacks[transactionHash] = ()=>{
-              console.log("META TX FINISHED",transactionHash)
+            callbacks[thisTransaction.hash] = ()=>{
+              console.log("META TX FINISHED",thisTransaction.hash)
             }
           }
         }
@@ -92,41 +92,66 @@ class Transactions extends Component {
         let callback = cb
 
         console.log("==MM meta:",this.props.metaAccount)
-
-        if(this.props.metaAccount){
-          console.log("================&&&& metaAccount, send as metatx to relayer "+this.props.metatx.endpoint+" to contract :",this.props.metatx.contract)
-          let _value = 0
-          this.sendMetaTx(this.props.metatx.contract,this.props.metaAccount.address,tx._parent._address,_value,tx.encodeABI())
+        let gasLimit
+        if(typeof maxGasLimit != "function"){
+          gasLimit = maxGasLimit
         }else{
-          let gasLimit
-          if(typeof maxGasLimit != "function"){
-            gasLimit = maxGasLimit
-          }else{
-            try{
-              gasLimit = Math.round((await tx.estimateGas()) * this.state.config.GASLIMITMULTIPLIER)
-            }catch(e){
-              gasLimit = this.state.DEFAULTGASLIMIT
-            }
+          try{
+            gasLimit = Math.round((await tx.estimateGas()) * this.state.config.GASLIMITMULTIPLIER)
+          }catch(e){
+            gasLimit = this.state.DEFAULTGASLIMIT
           }
-          if(typeof maxGasLimit == "function"){
-            callback = maxGasLimit
-          }
+        }
+        if(typeof maxGasLimit == "function"){
+          callback = maxGasLimit
+        }
 
-          if(!value) value=0
-          let paramsObject = {
-            from: this.props.account,
-            value: value,
-            gas: gasLimit,
-            gasPrice: Math.round(this.props.gwei * 1000000000)
-          }
+        if(!value) value=0
 
-          console.log("TX",paramsObject)
+        let from = this.props.account
+        if(this.props.metaAccount) from = this.props.metaAccount.address
 
-          if(typeof txData == "function"){
-            callback = txData
-          }else if(txData){
-            paramsObject.data = txData
-          }
+
+
+        let paramsObject = {
+          from: from,
+          value: value,
+          gas: gasLimit,
+          gasPrice: Math.round(this.props.gwei * 1000000000)
+        }
+
+
+
+        if(typeof txData == "function"){
+          callback = txData
+        }else if(txData){
+          paramsObject.data = txData
+        }
+
+        if(this.props.metaAccount&&this.props.metatx){
+          console.log("================&&&& metaAccount, send as metatx to relayer to contract :",this.props.metatx.contract)
+          let _value = 0
+          this.sendMetaTx(this.props.metatx.contract,this.props.metaAccount.address,tx._parent._address,_value,tx.encodeABI(),callback)
+        }else if(this.props.balance===0&&this.props.metatx){
+          console.log("================&&&& Etherless Account, send as metatx to relayer to contract :",this.props.metatx.contract)
+          let _value = 0
+          this.sendMetaTx(this.props.metatx.contract,this.props.account,tx._parent._address,_value,tx.encodeABI(),callback)
+        }else if(this.props.metaAccount){
+
+          console.log("Manually crafting... this might work...",tx,tx.arguments,tx.arguments[0].length)
+          paramsObject.to = tx._parent._address
+          paramsObject.data = tx.encodeABI()
+
+          console.log("TTTTTX",tx,paramsObject)
+
+          this.props.web3.eth.accounts.signTransaction(paramsObject, this.props.metaAccount.privateKey).then(signed => {
+              this.props.web3.eth.sendSignedTransaction(signed.rawTransaction).on('receipt', (receipt)=>{
+                console.log("META RECEIPT",receipt)
+                cb(receipt)
+              })
+          });
+        }else{
+
 
           if(this.state.config.DEBUG) console.log("gasLimit",gasLimit)
           if(this.state.config.DEBUG) console.log("this.props.gwei",this.props.gwei)
@@ -211,56 +236,100 @@ class Transactions extends Component {
             this.setState({transactions:currentTransactions})
           });
         }
+      },
+      send: async (to,value,cb)=>{
+        let {metaContract,account,web3} = this.props
+
+        let weiValue =  this.props.web3.utils.toWei(""+value, 'ether')
+
+        let result
+        if(this.props.metaAccount){
+          console.log("sending with meta account:",this.props.metaAccount.address)
+          /*result = await this.props.web3.eth.sendTransaction({
+            from:this.props.metaAccount.address,
+            to:to,
+            value: weiValue,
+            gas: 30000,
+            gasPrice: Math.round(this.props.gwei * 1000000000)
+          })*/
+          let tx={
+            to:to,
+            value: weiValue,
+            gas: 30000,
+            gasPrice: Math.round(this.props.gwei * 1000000000)
+          }
+          this.props.web3.eth.accounts.signTransaction(tx, this.props.metaAccount.privateKey).then(signed => {
+              this.props.web3.eth.sendSignedTransaction(signed.rawTransaction).on('receipt', (receipt)=>{
+                console.log("META RECEIPT",receipt)
+                cb(receipt)
+              })
+          });
+        }else{
+          console.log("sending with injected web3 account"),
+          result = await this.props.web3.eth.sendTransaction({
+            from:account,
+            to:to,
+            value: weiValue,
+            gas: 30000,
+            gasPrice: Math.round(this.props.gwei * 1000000000)
+          })
+        }
+
+        console.log("RESULT:",result)
+        cb(result)
       }
     })
   }
   componentWillUnmount(){
     clearInterval(interval)
   }
-  async sendMetaTx(proxyAddress,fromAddress,toAddress,value,txData){
+  async sendMetaTx(proxyAddress,fromAddress,toAddress,value,txData,callback){
     let {metaContract,account,web3} = this.props
+    console.log("Loading nonce for ",fromAddress)
     const nonce = await metaContract.nonce(fromAddress).call()
     console.log("Current nonce for "+fromAddress+" is ",nonce)
     let rewardAddress = "0x0000000000000000000000000000000000000000"
     let rewardAmount = 0
-    /*if(this.state.rewardTokenAddress){
-      if(this.state.rewardTokenAddress=="0"||this.state.rewardTokenAddress=="0x0000000000000000000000000000000000000000"){
-        rewardAddress = "0x0000000000000000000000000000000000000000"
-        this.setState({rewardTokenAddress:rewardAddress})
-        rewardAmount = web3.utils.toWei(this.state.rewardToken+"", 'ether')
-        console.log("rewardAmount",rewardAmount)
-      }else{
-        rewardAddress = this.state.rewardTokenAddress
-        rewardAmount = this.state.rewardToken
-      }
-    }*/
-
-    console.log("Reward: "+rewardAmount+" tokens at address "+rewardAddress)
 
 
-    const parts = [
-      proxyAddress,
-      fromAddress,
-      toAddress,
-      web3.utils.toTwosComplement(value),
-      txData,
-      rewardAddress,
-      web3.utils.toTwosComplement(rewardAmount),
-      web3.utils.toTwosComplement(nonce),
-    ]
+    let parts
+
+    if(typeof this.props.metaTxParts == "function"){
+      parts = this.props.metaTxParts(proxyAddress,fromAddress,toAddress,value,txData,nonce)
+    }else{
+      parts = [
+        proxyAddress,
+        fromAddress,
+        toAddress,
+        web3.utils.toTwosComplement(value),
+        txData,
+        rewardAddress,
+        web3.utils.toTwosComplement(rewardAmount),
+        web3.utils.toTwosComplement(nonce),
+      ]
+    }
+
     console.log("PARTS",parts)
     const hashOfMessage = soliditySha3(...parts);
     const message = hashOfMessage
     console.log("sign",message)
-    console.log(this.props.metaAccount.privateKey)
-    let sig = this.props.web3.eth.accounts.sign(message, this.props.metaAccount.privateKey);
+    let sig
+    //sign using either the meta account OR the etherless account
+    if(this.props.metaAccount.privateKey){
+      console.log(this.props.metaAccount.privateKey)
+      sig = this.props.web3.eth.accounts.sign(message, this.props.metaAccount.privateKey);
+      sig = sig.signature
+    }else{
+      sig = await this.props.web3.eth.personal.sign(""+message,this.props.account)
+    }
+
     //let sig = await this.props.web3.eth.personal.sign(""+message,account)
     console.log("SIG",sig)
     let postData = {
       gas: this.state.gasLimit,
       message: message,
       parts:parts,
-      sig:sig.signature,
+      sig:sig,
     }
 
 
@@ -269,7 +338,14 @@ class Transactions extends Component {
           'Content-Type': 'application/json',
       }
     }).then((response)=>{
-      console.log("TX RESULT",response)
+      console.log("TX RESULT",response.data.transactionHash)
+
+      let currentTransactions = this.state.transactions
+      currentTransactions.push({hash:response.data.transactionHash,time:Date.now(),addedFromCallback:1,metatx:true})
+      let callbacks = this.state.callbacks
+      callbacks[response.data.transactionHash] = callback
+      this.setState({transactions:currentTransactions,callbacks:callbacks})
+
     })
     .catch((error)=>{
       console.log(error);
@@ -288,6 +364,7 @@ class Transactions extends Component {
             let currentTransactions = this.state.transactions
             for(let t in currentTransactions){
               if(currentTransactions[t].hash == receipt.transactionHash){
+                if(this.state.config.DEBUG) console.log(" ~~ tx ~~ MATCHED")
                 if(!currentTransactions[t].fullReceipt){
                   if(this.state.config.DEBUG) console.log(" ~~ tx ~~ SETTING FULL RECEIPT ",transactions[t].hash)
                   currentTransactions[t].fullReceipt = receipt
@@ -296,6 +373,22 @@ class Transactions extends Component {
                   }
                   if(callbacks[currentTransactions[t].hash] && typeof callbacks[currentTransactions[t].hash] == "function"){
                     callbacks[currentTransactions[t].hash](receipt)
+                  }
+                  console.log("CHECKING META",currentTransactions[t])
+                  if(currentTransactions[t].metatx){
+                    let thisTxHash = receipt.transactionHash
+                    let age = Date.now()-currentTransactions[t].time
+                    console.log("WAITING ON ",thisTxHash,"with age",age)
+                    setTimeout(()=>{
+                      let currentTransactions = this.state.transactions
+                      for(let t in currentTransactions){
+                        if(currentTransactions[t].hash == thisTxHash){
+                          console.log("FOUND TX TO CLOSE")
+                          currentTransactions[t].closed=true
+                          this.setState({transactions:currentTransactions})
+                        }
+                      }
+                    },30000)
                   }
                 }
 
@@ -335,6 +428,9 @@ class Transactions extends Component {
 
   }
   render() {
+    if(this.state && this.state.config && this.state.config.hide){
+      return (<div></div>)
+    }
     let transactions = []
     this.state.transactions.map((transaction)=>{
       if(transaction.hash){
