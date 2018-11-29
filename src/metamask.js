@@ -184,30 +184,33 @@ class Metamask extends Component {
                           this.state.balance != balance
                         ) {
                           web3 = new Web3(window.web3.currentProvider);
-                          let ens = new ENS(window.web3.currentProvider);
-                          if (this.state.config.DEBUG)
-                          console.log('attempting to ens reverse account....');
-                          try {
-                            let rev = ens.reverse(_accounts[0]);
-                            if (rev) {
-                              var address = rev
-                              .name()
-                              .catch(err => {
-                                if (this.state.config.DEBUG)
-                                console.log(
-                                  'catch ens error (probably just didn\'t find it, ignore silently)'
-                                );
-                              })
-                              .then(data => {
-                                console.log('ENS data', data);
-                                if (data) {
-                                  this.setState({ ens: data }, () => {
-                                    this.props.onUpdate(this.state);
-                                  });
-                                }
-                              });
-                            }
-                          } catch (e) {}
+                          let ens = {};
+                          if (['Unknown', "Private"].indexOf(network) === -1) {
+                            let ens = new ENS(window.web3.currentProvider);
+                            if (this.state.config.DEBUG)
+                            console.log('attempting to ens reverse account....');
+                            try {
+                              let rev = ens.reverse(_accounts[0]);
+                              if (rev) {
+                                var address = rev
+                                .name()
+                                .catch(err => {
+                                  if (this.state.config.DEBUG)
+                                  console.log(
+                                    'catch ens error (probably just didn\'t find it, ignore silently)'
+                                  );
+                                })
+                                .then(data => {
+                                  console.log('ENS data', data);
+                                  if (data) {
+                                    this.setState({ ens: data }, () => {
+                                      this.props.onUpdate(this.state);
+                                    });
+                                  }
+                                });
+                              }
+                            } catch (e) {}
+                          }
 
                           let update = {
                             status: 'ready',
