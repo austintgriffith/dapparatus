@@ -81,6 +81,13 @@ class Transactions extends Component {
     interval = setInterval(this.checkTxs.bind(this),this.state.config.CHECKONTXS)
     this.checkTxs()
     this.props.onReady({
+      customtx: (hash,callback)=>{
+        let currentTransactions = this.state.transactions
+        currentTransactions.push({hash:hash,time:Date.now(),addedFromCallback:1,metatx:true})
+        let callbacks = this.state.callbacks
+        callbacks[hash] = callback
+        this.setState({transactions:currentTransactions,callbacks:callbacks})
+      },
       metatx: async (tx,maxGasLimit,txData,cb)=>{
         if(this.state.config.DEBUG) console.log("YOU WANT TO SEND A META TX ",tx,this.props.gwei)
         let callback = cb
