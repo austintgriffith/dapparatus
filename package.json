@@ -1,6 +1,6 @@
 {
   "name": "dapparatus",
-  "version": "1.0.41",
+  "version": "1.0.44",
   "description": "reusable dapp components in react: metamask, automatic gas, transaction ui, event parers etc...",
   "main": "build/index.js",
   "scripts": {
@@ -33,7 +33,6 @@
   "devDependencies": {
     "@babel/cli": "7.0.0",
     "@babel/core": "7.0.0",
-    "@babel/polyfill": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/register": "7.0.0",
     "babel-eslint": "^10.0.1",
@@ -60,6 +59,7 @@
     "axios": "^0.18.0",
     "deepmerge": "^2.1.1",
     "ethereum-ens": "^0.7.4",
+    "idempotent-babel-polyfill": "^7.0.0",
     "md5": "^2.2.1",
     "prop-types": "^15.6.2",
     "qr-image": "^3.2.0",

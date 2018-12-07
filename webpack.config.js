@@ -1,9 +1,8 @@
 var path = require('path');
-//needed to make async await work:
-require('babel-polyfill');
+
 module.exports = {
   mode: 'development',
-  entry: ['babel-polyfill', './src/index.js'],
+  entry: ['./src/index.js'],
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: 'index.js',
