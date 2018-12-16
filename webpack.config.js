@@ -12,9 +12,13 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        exclude: /node_modules/,
+        include: path.resolve(__dirname, 'src'),
+        exclude: /(node_modules|bower_components|build)/,
         use: {
-          loader: 'babel-loader'
+          loader: 'babel-loader',
+          options: {
+            presets: ['env']
+          }
         }
       },
       {
@@ -35,7 +39,7 @@ module.exports = {
     ]
   },
   externals: {
-    react: 'react',
+    'react': 'react',
     'react-dom': 'react-dom'
   }
 };

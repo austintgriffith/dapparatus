@@ -1,6 +1,6 @@
 {
   "name": "dapparatus",
-  "version": "1.0.48",
+  "version": "1.0.45",
   "description": "reusable dapp components in react: metamask, automatic gas, transaction ui, event parers etc...",
   "main": "build/index.js",
   "scripts": {
@@ -32,14 +32,13 @@
   },
   "devDependencies": {
     "@babel/cli": "7.0.0",
-    "@babel/core": "^7.0.0",
-    "@babel/plugin-proposal-object-rest-spread": "^7.2.0",
-    "@babel/plugin-transform-react-jsx": "^7.2.0",
-    "@babel/preset-env": "^7.2.0",
-    "@babel/preset-react": "^7.0.0",
+    "@babel/core": "7.0.0",
+    "@babel/preset-env": "^7.0.0",
     "@babel/register": "7.0.0",
     "babel-eslint": "^10.0.1",
-    "babel-loader": "^7.1.5",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-polyfill": "^6.0.16",
     "babel-preset-env": "^1.7.0",
     "babel-runtime": "^6.26.0",
@@ -64,7 +63,6 @@
     "md5": "^2.2.1",
     "prop-types": "^15.6.2",
     "qr-image": "^3.2.0",
-    "query-string": "^6.2.0",
     "rc-progress": "^2.2.5",
     "react": "^16.4.1",
     "react-blockies": "^1.3.0",
@@ -73,7 +71,7 @@
     "react-dom": "^16.4.1",
     "react-motion": "^0.5.2",
     "react-qr-reader": "^2.1.1",
-    "react-scripts": "^2.1.1",
+    "react-scripts": "1.1.4",
     "web3": "1.0.0-beta.34",
     "web3-utils": "1.0.0-beta.34"
   }
