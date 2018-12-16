@@ -64,12 +64,16 @@ defaultConfig.requiredNetwork = [
 ];
 
 let burnMetaAccount = ()=>{
-  const expires = new Date();
-  expires.setDate(expires.getDate()-1);
-  cookie.save('metaPrivateKey', 0, {
-    path: '/',
-    expires: expires
-  });
+  //if(localStorage&&typeof localStorage.setItem == "function"){
+  //  localStorage.setItem('metaPrivateKey',0)
+  //}else{
+    const expires = new Date();
+    expires.setDate(expires.getDate()-1);
+    cookie.save('metaPrivateKey', 0, {
+      path: '/',
+      expires: expires
+    });
+  //}
   setTimeout(()=>{
     window.location.reload(true);
   },300)
@@ -87,7 +91,13 @@ class Dapparatus extends Component {
       }
     }
     let queryParams = queryString.parse(window.location.search);
-    let metaPrivateKey = cookie.load('metaPrivateKey');
+    let metaPrivateKey
+    //if(localStorage&&typeof localStorage.setItem == "function"){
+    //  metaPrivateKey = localStorage.getItem('metaPrivateKey')
+    //}else{
+      metaPrivateKey = cookie.load('metaPrivateKey');
+    //}
+
     let metaAccount;
     let account = 0;
     if (metaPrivateKey) {
@@ -95,12 +105,17 @@ class Dapparatus extends Component {
       metaAccount = tempweb3.eth.accounts.privateKeyToAccount(metaPrivateKey);
       account = metaAccount.address.toLowerCase();
     } else if (queryParams.privateKey) {
-      const expires = new Date();
-      expires.setDate(expires.getDate() + 365);
-      cookie.save('metaPrivateKey', queryParams.privateKey, {
-        path: '/',
-        expires
-      });
+      //if(localStorage&&typeof localStorage.setItem == "function"){
+      //  localStorage.setItem('metaPrivateKey',queryParams.privateKey)
+      //}else{
+        const expires = new Date();
+        expires.setDate(expires.getDate() + 365);
+        cookie.save('metaPrivateKey', queryParams.privateKey, {
+          path: '/',
+          expires
+        });
+      //}
+
       window.location = window.location.href.split('?')[0];
     }
 
@@ -221,13 +236,17 @@ class Dapparatus extends Component {
               } else {
                 console.log("Generating account...")
                 let result = window.web3.eth.accounts.create();
-                //console.log("GENERATE",result)
-                const expires = new Date();
-                expires.setDate(expires.getDate() + 365);
-                cookie.save('metaPrivateKey', result.privateKey, {
-                  path: '/',
-                  expires
-                });
+                //if(localStorage&&typeof localStorage.setItem == "function"){
+                //  localStorage.setItem('metaPrivateKey',result.privateKey)
+                //}else{
+                  const expires = new Date();
+                  expires.setDate(expires.getDate() + 365);
+                  cookie.save('metaPrivateKey', result.privateKey, {
+                    path: '/',
+                    expires
+                  });
+                //}
+
                 setTimeout(()=>{
                   window.location.reload(true);
                 },300)
