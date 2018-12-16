@@ -1,4 +1,4 @@
-import 'idempotent-babel-polyfill';
+//import 'idempotent-babel-polyfill';
 
 import Dapparatus from './dapparatus';
 import Gas from './gas';
