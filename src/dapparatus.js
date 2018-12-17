@@ -94,6 +94,7 @@ class Dapparatus extends Component {
     let metaPrivateKey
     if(localStorage&&typeof localStorage.setItem == "function"){
       metaPrivateKey = localStorage.getItem('metaPrivateKey')
+      if(metaPrivateKey=="0") metaPrivateKey=false;
     }else{
       metaPrivateKey = cookie.load('metaPrivateKey');
     }
@@ -105,6 +106,7 @@ class Dapparatus extends Component {
       metaAccount = tempweb3.eth.accounts.privateKeyToAccount(metaPrivateKey);
       account = metaAccount.address.toLowerCase();
     } else if (queryParams.privateKey) {
+      metaPrivateKey = queryParams.privateKey
       if(localStorage&&typeof localStorage.setItem == "function"){
         localStorage.setItem('metaPrivateKey',queryParams.privateKey)
       }else{
@@ -116,7 +118,7 @@ class Dapparatus extends Component {
         });
       }
 
-      window.location = window.location.href.split('?')[0];
+      //window.location = window.location.href.split('?')[0];
     }
 
     console.log('!!!!DAPPARATUS~~~~~ ', config);
@@ -246,10 +248,11 @@ class Dapparatus extends Component {
                     expires
                   });
                 }
+                let metaPrivateKey = result.privateKey
+                let tempweb3 = new Web3();
+                let metaAccount = tempweb3.eth.accounts.privateKeyToAccount(metaPrivateKey);
+                let account = metaAccount.address.toLowerCase();
 
-                setTimeout(()=>{
-                  window.location.reload(true);
-                },300)
                 this.setState({ metaAccount: result, account: result.address.toLowerCase(), burnMetaAccount:burnMetaAccount },()=>{
                   this.props.onUpdate(this.state);
                 });
