@@ -100,7 +100,7 @@ class Dapparatus extends Component {
       metaPrivateKey = cookie.load('metaPrivateKey');
       //what we need to do is convert someone over to localstorage from a cookie too...
       if(metaPrivateKey && localStorage && typeof localStorage.setItem == "function"){
-        metaPrivateKey = localStorage.setItem('metaPrivateKey',metaPrivateKey)
+        localStorage.setItem('metaPrivateKey',metaPrivateKey)
         //now expire the cookie
         const expires = new Date();
         expires.setDate(expires.getDate()-1);
