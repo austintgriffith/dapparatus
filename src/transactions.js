@@ -244,10 +244,19 @@ class Transactions extends Component {
           });
         }
       },
-      send: async (to,value,cb)=>{
+      send: async (to,value,gasLimit,cb)=>{
         let {metaContract,account,web3} = this.props
 
         let weiValue =  this.props.web3.utils.toWei(""+value, 'ether')
+
+        let setGasLimit = 30000
+        if(typeof gasLimit == "function"){
+          cb=gasLimit
+        }else if(gasLimit){
+          setGasLimit=gasLimit
+        }
+
+        console.log("DAPPARATUS SENDING WITH GAS LIMIT",setGasLimit)
 
         let result
         if(this.props.metaAccount){
@@ -262,10 +271,12 @@ class Transactions extends Component {
           let tx={
             to:to,
             value: weiValue,
-            gas: 30000,
+            gas: setGasLimit,
             gasPrice: Math.round(this.props.gwei * 1000000000)
           }
+          console.log("TX SIGNED TO METAMASK:",tx)
           this.props.web3.eth.accounts.signTransaction(tx, this.props.metaAccount.privateKey).then(signed => {
+              console.log("SIGNED:",signed)
               this.props.web3.eth.sendSignedTransaction(signed.rawTransaction).on('receipt', (receipt)=>{
                 console.log("META RECEIPT",receipt)
                 cb(receipt)
@@ -277,7 +288,7 @@ class Transactions extends Component {
             from:account,
             to:to,
             value: weiValue,
-            gas: 30000,
+            gas: setGasLimit,
             gasPrice: Math.round(this.props.gwei * 1000000000)
           })
         }

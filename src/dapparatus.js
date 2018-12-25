@@ -90,59 +90,19 @@ class Dapparatus extends Component {
         config.requiredNetwork = props.config.requiredNetwork;
       }
     }
-    let queryParams = queryString.parse(window.location.search);
-    let metaPrivateKey
-    if(localStorage&&typeof localStorage.setItem == "function"){
-      metaPrivateKey = localStorage.getItem('metaPrivateKey')
-      if(metaPrivateKey=="0") metaPrivateKey=false;
-    }
-    if(!metaPrivateKey){
-      metaPrivateKey = cookie.load('metaPrivateKey');
-      //what we need to do is convert someone over to localstorage from a cookie too...
-      if(metaPrivateKey && localStorage && typeof localStorage.setItem == "function"){
-        localStorage.setItem('metaPrivateKey',metaPrivateKey)
-        //now expire the cookie
-        const expires = new Date();
-        expires.setDate(expires.getDate()-1);
-        cookie.save('metaPrivateKey', 0, {
-          path: '/',
-          expires: expires
-        });
-      }
-    }
 
-    let metaAccount;
-    let account = 0;
-    if (metaPrivateKey) {
-      let tempweb3 = new Web3();
-      metaAccount = tempweb3.eth.accounts.privateKeyToAccount(metaPrivateKey);
-      account = metaAccount.address.toLowerCase();
-    } else if (queryParams.privateKey) {
-      metaPrivateKey = queryParams.privateKey
-      if(localStorage&&typeof localStorage.setItem == "function"){
-        localStorage.setItem('metaPrivateKey',queryParams.privateKey)
-      }else{
-        const expires = new Date();
-        expires.setDate(expires.getDate() + 365);
-        cookie.save('metaPrivateKey', queryParams.privateKey, {
-          path: '/',
-          expires
-        });
-      }
-      //window.location = window.location.href.split('?')[0];
-    }
 
     console.log('!!!!DAPPARATUS~~~~~ ', config);
 
     this.state = {
       status: 'loading',
       network: 0,
-      account: account,
+      account: false,
       etherscan: '',
       config: config,
       avgBlockTime: 15000,
       lastBlockTime: 0,
-      metaAccount: metaAccount,
+      metaAccount: false,
       burnMetaAccount: burnMetaAccount,
       web3Fellback: false,
       hasRequestedAccess: false
@@ -204,6 +164,73 @@ class Dapparatus extends Component {
           this.inspectNetwork(network);
         });
       }
+    }
+
+    let queryParams = queryString.parse(window.location.search);
+    let metaPrivateKey
+    if(this.props.newPrivateKey){
+      metaPrivateKey = this.props.newPrivateKey
+      if(metaPrivateKey.indexOf("0x")!=0){
+        metaPrivateKey="0x"+metaPrivateKey
+      }
+      console.log("SAVING HARD CODED PRIVATE KEY",metaPrivateKey)
+      if(localStorage&&typeof localStorage.setItem == "function"){
+        localStorage.setItem('metaPrivateKey',metaPrivateKey)
+      }else{
+        const expires = new Date();
+        expires.setDate(expires.getDate() + 365);
+        cookie.save('metaPrivateKey', metaPrivateKey, {
+          path: '/',
+          expires
+        });
+      }
+      console.log("Clearing new private key")
+      this.setState({newPrivateKey:false})
+    }else if(localStorage&&typeof localStorage.setItem == "function"){
+      metaPrivateKey = localStorage.getItem('metaPrivateKey')
+      if(metaPrivateKey=="0") metaPrivateKey=false;
+    }
+    if(!metaPrivateKey){
+      metaPrivateKey = cookie.load('metaPrivateKey');
+      //what we need to do is convert someone over to localstorage from a cookie too...
+      //(we used to use cookies and we upgraded to localStorage)
+      if(metaPrivateKey && localStorage && typeof localStorage.setItem == "function"){
+        localStorage.setItem('metaPrivateKey',metaPrivateKey)
+        //now expire the cookie
+        const expires = new Date();
+        expires.setDate(expires.getDate()-1);
+        cookie.save('metaPrivateKey', 0, {
+          path: '/',
+          expires: expires
+        });
+      }
+    }
+
+    let metaAccount;
+    let account = 0;
+    if (metaPrivateKey) {
+      let tempweb3 = new Web3();
+      metaAccount = tempweb3.eth.accounts.privateKeyToAccount(metaPrivateKey);
+      account = metaAccount.address.toLowerCase();
+    } else if (queryParams.privateKey) {
+      metaPrivateKey = queryParams.privateKey
+      if(localStorage&&typeof localStorage.setItem == "function"){
+        localStorage.setItem('metaPrivateKey',queryParams.privateKey)
+      }else{
+        const expires = new Date();
+        expires.setDate(expires.getDate() + 365);
+        cookie.save('metaPrivateKey', queryParams.privateKey, {
+          path: '/',
+          expires
+        });
+      }
+      //window.location = window.location.href.split('?')[0];
+    }
+    if(account && account!=this.state.account){
+      this.setState({account,metaAccount},()=>{
+        console.log("DAPP ONUPDATE",this.state)
+        this.props.onUpdate(this.state);
+      })
     }
   }
   inspectNetwork(network) {
