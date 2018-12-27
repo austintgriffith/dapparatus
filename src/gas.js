@@ -26,34 +26,41 @@ class Gas extends Component {
   }
   componentDidMount(){
     pollInterval = setInterval(this.checkOnGasPrices.bind(this),pollTime)
+    setTimeout(this.checkOnGasPrices.bind(this),3500)
+    setTimeout(this.checkOnGasPrices.bind(this),8500)
+    setTimeout(this.checkOnGasPrices.bind(this),19000)
     this.checkOnGasPrices()
   }
   componentWillUnmount(){
     clearInterval(pollInterval)
   }
   checkOnGasPrices(){
-    if(!this.state.config.hardcodedGwei){
-      axios.get("https://ethgasstation.info/json/ethgasAPI.json", { crossdomain: true })
-      .catch((err)=>{
-        console.log("Error getting gas price",err)
-      })
-      .then((response)=>{
-        if(response && response.data.average>0&&response.data.average<200){
-          response.data.average=response.data.average + (response.data.average*GASBOOSTPRICE)
-          let setMainGasTo = Math.round(response.data.average*100)/1000
-          if(this.state.gwei!=setMainGasTo){
-            let update = {gwei:setMainGasTo}
-            this.setState(update)
-            this.props.onUpdate(update)
+    console.log("MAYBEDOGAS",this.props.network)
+    if(this.props.network && this.props.network == "Mainnet"){
+      console.log("PROBDOGAS",this.props.network)
+      if(!this.state.config.hardcodedGwei){
+        console.log("YESDOGAS",this.props.network)
+        axios.get("https://ethgasstation.info/json/ethgasAPI.json", { crossdomain: true })
+        .catch((err)=>{
+          console.log("Error getting gas price",err)
+        })
+        .then((response)=>{
+          if(response && response.data.average>0&&response.data.average<200){
+            response.data.average=response.data.average + (response.data.average*GASBOOSTPRICE)
+            let setMainGasTo = Math.round(response.data.average*100)/1000
+            if(this.state.gwei!=setMainGasTo){
+              let update = {gwei:setMainGasTo}
+              this.setState(update)
+              this.props.onUpdate(update)
+            }
           }
-        }
-      })
-    }else{
-      let update = {gwei:this.state.config.hardcodedGwei}
-      this.setState(update)
-      this.props.onUpdate(update)
+        })
+      }else{
+        let update = {gwei:this.state.config.hardcodedGwei}
+        this.setState(update)
+        this.props.onUpdate(update)
+      }
     }
-
   }
   render() {
     if(this.state.config.hide){
