@@ -35,11 +35,8 @@ class Gas extends Component {
     clearInterval(pollInterval)
   }
   checkOnGasPrices(){
-    console.log("MAYBEDOGAS",this.props.network)
     if(this.props.network && this.props.network == "Mainnet"){
-      console.log("PROBDOGAS",this.props.network)
       if(!this.state.config.hardcodedGwei){
-        console.log("YESDOGAS",this.props.network)
         axios.get("https://ethgasstation.info/json/ethgasAPI.json", { crossdomain: true })
         .catch((err)=>{
           console.log("Error getting gas price",err)
