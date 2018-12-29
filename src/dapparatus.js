@@ -63,7 +63,7 @@ defaultConfig.requiredNetwork = [
   'Unknown' //allow local RPC for testing
 ];
 
-let burnMetaAccount = ()=>{
+let burnMetaAccount = (skipReload)=>{
   if(localStorage&&typeof localStorage.setItem == "function"){
     localStorage.setItem('metaPrivateKey',0)
   }else{
@@ -74,9 +74,11 @@ let burnMetaAccount = ()=>{
       expires: expires
     });
   }
-  setTimeout(()=>{
-    window.location.reload(true);
-  },300)
+  if(!skipReload){
+    setTimeout(()=>{
+      window.location.reload(true);
+    },300)
+  }
 }
 
 class Dapparatus extends Component {
@@ -208,7 +210,7 @@ class Dapparatus extends Component {
 
     let metaAccount;
     let account = 0;
-    if (metaPrivateKey) {
+    if (metaPrivateKey&&metaPrivateKey!="0") {
       let tempweb3 = new Web3();
       metaAccount = tempweb3.eth.accounts.privateKeyToAccount(metaPrivateKey);
       account = metaAccount.address.toLowerCase();
@@ -311,8 +313,14 @@ class Dapparatus extends Component {
             //console.lob("no metaAccount")
           }
         } else {
-          if (this.state.config.DEBUG)
+          if (this.state.config.DEBUG){
             console.log('DAPPARATUS - injected account: ', _accounts);
+          }
+
+          //there is a strange bug where we end up with a meta account and then web3 is injected
+          //What I want to do here is clear any localstorage if web3 is injected
+          burnMetaAccount(true)
+
           this.inspectAccounts(_accounts, network);
           this.setState({ metaAccount: false });
         }
@@ -334,8 +342,8 @@ class Dapparatus extends Component {
       if (currentAccounts.length <= 0) {
         //window.location.reload(true);
         console.log('RELOAD BECAUSE LOST ACCOUNTS?');
-      } else if (this.state.account != currentAccounts[0].toLowerCase()) {
-        // window.location.reload(true);
+      } else if (!this.state.metaAccount && this.state.account != currentAccounts[0].toLowerCase()) {
+         window.location.reload(true);
         console.log('RELOAD BECAUSE DIFFERENT ACCOUNTS?');
       }
     }
