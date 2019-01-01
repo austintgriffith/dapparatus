@@ -244,7 +244,7 @@ class Transactions extends Component {
           });
         }
       },
-      send: async (to,value,gasLimit,cb)=>{
+      send: async (to,value,gasLimit,txData,cb)=>{
         let {metaContract,account,web3} = this.props
 
         let weiValue =  this.props.web3.utils.toWei(""+value, 'ether')
@@ -254,6 +254,13 @@ class Transactions extends Component {
           cb=gasLimit
         }else if(gasLimit){
           setGasLimit=gasLimit
+        }
+
+        let data = false
+        if(typeof txData == "function"){
+          cb = txData
+        }else{
+          data = txData
         }
 
         console.log("DAPPARATUS SENDING WITH GAS LIMIT",setGasLimit)
@@ -274,6 +281,9 @@ class Transactions extends Component {
             gas: setGasLimit,
             gasPrice: Math.round(this.props.gwei * 1000000000)
           }
+          if(data){
+            tx.data = data
+          }
           console.log("TX SIGNED TO METAMASK:",tx)
           this.props.web3.eth.accounts.signTransaction(tx, this.props.metaAccount.privateKey).then(signed => {
               console.log("SIGNED:",signed)
@@ -283,14 +293,24 @@ class Transactions extends Component {
               })
           });
         }else{
-          console.log("sending with injected web3 account"),
-          result = await this.props.web3.eth.sendTransaction({
+          let data = false
+          if(typeof txData == "function"){
+            cb = txData
+          }else{
+            data = txData
+          }
+          let txObject = {
             from:account,
             to:to,
             value: weiValue,
             gas: setGasLimit,
             gasPrice: Math.round(this.props.gwei * 1000000000)
-          })
+          }
+          if(data){
+            txObject.data = data
+          }
+          console.log("sending with injected web3 account"),
+          result = await this.props.web3.eth.sendTransaction(txObject)
         }
 
         console.log("RESULT:",result)
