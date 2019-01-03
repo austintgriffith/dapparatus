@@ -421,11 +421,6 @@ class Dapparatus extends Component {
                 });
             } catch (e) {}
           }
-          console.log(
-            'Saving web3, generated account:',
-            this.state.metaAccount,
-            web3
-          );
           let update = {
             status: 'ready',
             block: block,
