@@ -277,27 +277,30 @@ class Dapparatus extends Component {
                 window.location = this.state.config.metatxAccountGenerator;
               } else {
                 console.log("Generating account...")
-                let result = window.web3.eth.accounts.create();
-                if(localStorage&&typeof localStorage.setItem == "function"){
-                  localStorage.setItem('metaPrivateKey',result.privateKey)
-                }else{
-                  const expires = new Date();
-                  expires.setDate(expires.getDate() + 365);
-                  cookie.save('metaPrivateKey', result.privateKey, {
-                    path: '/',
-                    expires
+                try{
+                  let result = window.web3.eth.accounts.create();
+                  if(localStorage&&typeof localStorage.setItem == "function"){
+                    localStorage.setItem('metaPrivateKey',result.privateKey)
+                  }else{
+                    const expires = new Date();
+                    expires.setDate(expires.getDate() + 365);
+                    cookie.save('metaPrivateKey', result.privateKey, {
+                      path: '/',
+                      expires
+                    });
+                  }
+                  let metaPrivateKey = result.privateKey
+                  let tempweb3 = new Web3();
+                  let metaAccount = tempweb3.eth.accounts.privateKeyToAccount(metaPrivateKey);
+                  let account = metaAccount.address.toLowerCase();
+
+                  this.setState({ metaAccount: result, account: result.address.toLowerCase(), burnMetaAccount:burnMetaAccount },()=>{
+                    this.props.onUpdate(this.state);
                   });
+                }catch(e){
+                  console.log(e)
                 }
-                let metaPrivateKey = result.privateKey
-                let tempweb3 = new Web3();
-                let metaAccount = tempweb3.eth.accounts.privateKeyToAccount(metaPrivateKey);
-                let account = metaAccount.address.toLowerCase();
-
-                this.setState({ metaAccount: result, account: result.address.toLowerCase(), burnMetaAccount:burnMetaAccount },()=>{
-                  this.props.onUpdate(this.state);
-                });
               }
-
             });
           } else {
             let currentAccounts = [];
