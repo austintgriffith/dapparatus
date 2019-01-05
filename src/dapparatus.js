@@ -175,7 +175,7 @@ class Dapparatus extends Component {
       if(metaPrivateKey.indexOf("0x")!=0){
         metaPrivateKey="0x"+metaPrivateKey
       }
-      console.log("SAVING HARD CODED PRIVATE KEY",metaPrivateKey)
+      //console.log("SAVING HARD CODED PRIVATE KEY",metaPrivateKey)
       if(localStorage&&typeof localStorage.setItem == "function"){
         localStorage.setItem('metaPrivateKey',metaPrivateKey)
       }else{
