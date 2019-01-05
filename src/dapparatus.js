@@ -143,13 +143,13 @@ class Dapparatus extends Component {
       if (this.state.config.DEBUG) console.log('DAPPARATUS - no web3');
       if (this.state.status == 'loading') {
         this.setState({ status: 'noweb3' }, () => {
-          this.props.onUpdate(this.state);
+          this.props.onUpdate(Object.assign({}, this.state));
         });
       } else if (this.state.status != 'noweb3') {
         if (this.state.config.DEBUG) console.log('DAPPARATUS - lost web3');
         window.location.reload(true);
         this.setState({ status: 'error' }, () => {
-          this.props.onUpdate(this.state);
+          this.props.onUpdate(Object.assign({}, this.state));
         });
       }
     } else {
@@ -231,7 +231,7 @@ class Dapparatus extends Component {
     if(account && account!=this.state.account){
       this.setState({account,metaAccount},()=>{
         console.log("DAPP ONUPDATE",this.state)
-        this.props.onUpdate(this.state);
+        this.props.onUpdate(Object.assign({}, this.state));
       })
     }
   }
@@ -256,7 +256,7 @@ class Dapparatus extends Component {
           if (!this.state.hasRequestedAccess) { // Prevent multiple prompts
             if (this.state.config.DEBUG) console.log('METAMASK - requesting access from user...');
             this.setState({ hasRequestedAccess: true},() => {
-              this.props.onUpdate(this.state);
+              this.props.onUpdate(Object.assign({}, this.state));
             });
             try{
               window.ethereum.enable().then(() => {
@@ -265,7 +265,7 @@ class Dapparatus extends Component {
             } catch (e) {
               console.log(e);
               this.setState({ status: 'private', network: network },() => {
-                this.props.onUpdate(this.state);
+                this.props.onUpdate(Object.assign({}, this.state));
               });
             }
           }
@@ -295,7 +295,7 @@ class Dapparatus extends Component {
                   let account = metaAccount.address.toLowerCase();
 
                   this.setState({ metaAccount: result, account: result.address.toLowerCase(), burnMetaAccount:burnMetaAccount },()=>{
-                    this.props.onUpdate(this.state);
+                    this.props.onUpdate(Object.assign({}, this.state));
                   });
                 }catch(e){
                   console.log(e)
@@ -353,12 +353,12 @@ class Dapparatus extends Component {
     if (!currentAccounts) {
       if (this.state.status != 'error')
         this.setState({ status: 'error', network: network }, () => {
-          this.props.onUpdate(this.state);
+          this.props.onUpdate(Object.assign({}, this.state));
         });
     } else if (currentAccounts.length <= 0) {
       if (this.state.status != 'locked')
         this.setState({ status: 'locked', network: network }, () => {
-          this.props.onUpdate(this.state);
+          this.props.onUpdate(Object.assign({}, this.state));
         });
     } else {
       this.loadBlockBalanceAndName(currentAccounts[0].toLowerCase(), network);
@@ -418,7 +418,7 @@ class Dapparatus extends Component {
                   console.log('ENS data', data);
                   if (data) {
                     this.setState({ ens: data }, () => {
-                      this.props.onUpdate(this.state);
+                      this.props.onUpdate(Object.assign({}, this.state));
                     });
                   }
                 });
@@ -445,7 +445,7 @@ class Dapparatus extends Component {
             update.lastBlockTime = Date.now();
           }
           this.setState(update, () => {
-            this.props.onUpdate(this.state);
+            this.props.onUpdate(Object.assign({}, this.state));
           });
         }
       });
