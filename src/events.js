@@ -59,6 +59,7 @@ class Events extends Component {
           eventObject[keyArray[k]] = thisEvent[keyArray[k]]
         }
         eventObject.blockNumber = newEvents[e].blockNumber
+        eventObject.hash = newEvents[e].transactionHash
         let idSafe = id
         if(!idSafe){
           idSafe = md5(JSON.stringify(eventObject))
@@ -114,6 +115,7 @@ class Events extends Component {
             eventObject[keyArray[k]] = thisEvent[keyArray[k]]
           }
           eventObject.blockNumber = newEvents[e].blockNumber
+          eventObject.hash = newEvents[e].transactionHash
           let idSafe = id
           if(!idSafe){
             idSafe = md5(JSON.stringify(eventObject))
