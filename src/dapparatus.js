@@ -13,7 +13,7 @@ const queryString = require('query-string');
 let interval;
 let defaultConfig = {};
 defaultConfig.DEBUG = false;
-defaultConfig.POLLINTERVAL = 777;
+defaultConfig.POLLINTERVAL = 1777;
 defaultConfig.showBalance = true;
 
 //metatx
@@ -132,23 +132,39 @@ class Dapparatus extends Component {
   }
   checkMetamask() {
     if (this.state.config.DEBUG) console.log('DAPPARATUS - checking state...');
-    if (typeof window.web3 == 'undefined') {
+
+    /*
+    console.log("CHECK")
+    try{
+      console.log("GETTING NETWORK ")
+      window.web3.version.getNetwork((err,network)=>{
+        console.log("GOT")
+        console.log(err)
+        console.log(network)
+      })
+    }catch(e){
+      console.log("FAILED ")
+      console.log(e.toString())
+      this.fallBackToInfura()
+      return;
+    }*/
+
+
+    if (typeof window.web3 == 'undefined' || (typeof window.web3.version == "undefined" && typeof window.web3.eth == "undefined")) {
+      console.log("NO WEB3 YET (or no web3.version / web3.eth)")
+      if (this.state.config.DEBUG) console.log('DAPPARATUS - no web3');
       console.log('Connecting to infura...');
       window.web3 = new Web3(this.props.fallbackWeb3Provider); //CORS ISSUES!//
-      this.setState({ web3Fellback: true });
+      console.log("web3 loaded, reporting as 'fellback'")
       //window.web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws'))
-    }
-
-    if (typeof window.web3 == 'undefined') {
-      if (this.state.config.DEBUG) console.log('DAPPARATUS - no web3');
       if (this.state.status == 'loading') {
-        this.setState({ status: 'noweb3' }, () => {
+        this.setState({ web3Fellback:true, status: 'noweb3' }, () => {
           this.props.onUpdate(Object.assign({}, this.state));
         });
       } else if (this.state.status != 'noweb3') {
         if (this.state.config.DEBUG) console.log('DAPPARATUS - lost web3');
-        window.location.reload(true);
-        this.setState({ status: 'error' }, () => {
+        ///window.location.reload(true);
+        this.setState({ web3Fellback:true, status: 'error' }, () => {
           this.props.onUpdate(Object.assign({}, this.state));
         });
       }
@@ -156,8 +172,9 @@ class Dapparatus extends Component {
       if (this.state.config.DEBUG) {
         console.log('DAPPARATUS - yes web 3', window.web3);
       }
-      if (typeof window.web3.version.getNetwork != 'function') {
-        window.window.web3.eth.net.getId((err, network) => {
+      if (typeof window.web3.version == "undefined" || typeof window.web3.version.getNetwork != 'function') {
+        console.log("cant use version to get network, trying web3.eth.net ...")
+        window.web3.eth.net.getId((err, network) => {
           //console.log("NETWORK GETID",err,network)
           this.inspectNetwork(network);
         });
@@ -260,7 +277,9 @@ class Dapparatus extends Component {
             });
             try{
               window.ethereum.enable().then(() => {
-                 window.location.reload(true);
+                  //this reload was causing opera on android to constantly reload
+                 /////window.location.reload(true);
+                 this.props.onUpdate(Object.assign({}, this.state));
               })
             } catch (e) {
               console.log(e);
