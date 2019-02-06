@@ -173,7 +173,7 @@ class Dapparatus extends Component {
         console.log('DAPPARATUS - yes web 3', window.web3);
       }
       if (typeof window.web3.version == "undefined" || typeof window.web3.version.getNetwork != 'function') {
-        console.log("cant use version to get network, trying web3.eth.net ...")
+        //console.log("cant use version to get network, trying web3.eth.net ...")
         window.web3.eth.net.getId((err, network) => {
           //console.log("NETWORK GETID",err,network)
           this.inspectNetwork(network);
