@@ -203,7 +203,7 @@ class Dapparatus extends Component {
           expires
         });
       }
-      console.log("Clearing new private key")
+      console.log("Clearing new private key...")
       this.setState({newPrivateKey:false})
     }else if(localStorage&&typeof localStorage.setItem == "function"){
       metaPrivateKey = localStorage.getItem('metaPrivateKey')
