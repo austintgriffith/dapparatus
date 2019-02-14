@@ -208,7 +208,7 @@ class Dapparatus extends Component {
     }else if(localStorage&&typeof localStorage.setItem == "function"){
       metaPrivateKey = localStorage.getItem('metaPrivateKey')
       if(metaPrivateKey=="0") metaPrivateKey=false;
-      if(metaPrivateKey.length!==66) metaPrivateKey=false;
+      if(metaPrivateKey && metaPrivateKey.length!==66) metaPrivateKey=false;
     }
     if(!metaPrivateKey){
       metaPrivateKey = cookie.load('metaPrivateKey');
