@@ -405,6 +405,10 @@ class Dapparatus extends Component {
             etherscan = 'https://blockscout.com/poa/core/';
           } else if (network == 'xDai') {
             etherscan = 'https://blockscout.com/poa/dai/';
+          } else if (network == 'ARTIS sigma1') {
+            etherscan = 'https://explorer.sigma1.artis.network/';
+          } else if (network == 'ARTIS tau1') {
+            etherscan = 'https://explorer.tau1.artis.network/';
           } else if (network != 'Mainnet') {
             etherscan = 'https://' + network.toLowerCase() + '.etherscan.io/';
           }
@@ -660,6 +664,10 @@ function translateNetwork(network) {
     return 'POA';
   } else if (network == 100) {
     return 'xDai';
+  } else if (network == 246529) {
+    return 'ARTIS sigma1';
+  } else if (network == 246785) {
+    return 'ARTIS tau1';
   } else {
     return 'Unknown';
   }
