@@ -669,9 +669,9 @@ function translateNetwork(network) {
   } else if (network == 100) {
     return 'xDai';
   } else if (network == 246529) {
-    return 'ARTIS sigma1';
+    return 'ARTIS Sigma1';
   } else if (network == 246785) {
-    return 'ARTIS tau1';
+    return 'ARTIS Tau1';
   } else {
     return 'Unknown';
   }
