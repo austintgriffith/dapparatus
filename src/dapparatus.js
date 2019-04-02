@@ -263,9 +263,9 @@ class Dapparatus extends Component {
       }else if(window.web3 && window.web3.currentProvider && window.web3.currentProvider.host && window.web3.currentProvider.host.indexOf("poa.network")>=0){
         network="POA"
       }else if(window.web3 && window.web3.currentProvider && window.web3.currentProvider.host && window.web3.currentProvider.host.indexOf("sigma1.artis.network")>=0){
-        network="ARTIS sigma1"
+        network="ARTIS Sigma1"
       }else if(window.web3 && window.web3.currentProvider && window.web3.currentProvider.host && window.web3.currentProvider.host.indexOf("tau1.artis.network")>=0){
-        network="ARTIS tau1"
+        network="ARTIS Tau1"
       }
     }
     if (this.state.config.DEBUG) console.log('DAPPARATUS - translated network', network);
