@@ -263,9 +263,9 @@ class Dapparatus extends Component {
       }else if(window.web3 && window.web3.currentProvider && window.web3.currentProvider.host && window.web3.currentProvider.host.indexOf("poa.network")>=0){
         network="POA"
       }else if(window.web3 && window.web3.currentProvider && window.web3.currentProvider.host && window.web3.currentProvider.host.indexOf("sigma1.artis.network")>=0){
-        network="ARTIS sigma1"
+        network="ARTIS Sigma1"
       }else if(window.web3 && window.web3.currentProvider && window.web3.currentProvider.host && window.web3.currentProvider.host.indexOf("tau1.artis.network")>=0){
-        network="ARTIS tau1"
+        network="ARTIS Tau1"
       }
     }
     if (this.state.config.DEBUG) console.log('DAPPARATUS - translated network', network);
@@ -409,9 +409,9 @@ class Dapparatus extends Component {
             etherscan = 'https://blockscout.com/poa/core/';
           } else if (network == 'xDai') {
             etherscan = 'https://blockscout.com/poa/dai/';
-          } else if (network == 'ARTIS sigma1') {
+          } else if (network == 'ARTIS Sigma1') {
             etherscan = 'https://explorer.sigma1.artis.network/';
-          } else if (network == 'ARTIS tau1') {
+          } else if (network == 'ARTIS Tau1') {
             etherscan = 'https://explorer.tau1.artis.network/';
           } else if (network != 'Mainnet') {
             etherscan = 'https://' + network.toLowerCase() + '.etherscan.io/';
@@ -669,9 +669,9 @@ function translateNetwork(network) {
   } else if (network == 100) {
     return 'xDai';
   } else if (network == 246529) {
-    return 'ARTIS sigma1';
+    return 'ARTIS Sigma1';
   } else if (network == 246785) {
-    return 'ARTIS tau1';
+    return 'ARTIS Tau1';
   } else {
     return 'Unknown';
   }
