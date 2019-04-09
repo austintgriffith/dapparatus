@@ -32,7 +32,8 @@ class Transactions extends Component {
       transactions:[],
       currentBlock:0,
       config: config,
-      callbacks: {}
+      callbacks: {},
+      txnonce:0,
     }
     if(props.metatx){
       this.metaTxPoll()
@@ -149,14 +150,26 @@ class Transactions extends Component {
           paramsObject.to = tx._parent._address
           paramsObject.data = tx.encodeABI()
 
-          console.log("TTTTTX",tx,paramsObject)
 
-          this.props.web3.eth.accounts.signTransaction(paramsObject, this.props.metaAccount.privateKey).then(signed => {
-              this.props.web3.eth.sendSignedTransaction(signed.rawTransaction).on('receipt', (receipt)=>{
-                console.log("META RECEIPT",receipt)
-                cb(receipt)
-              })
-          });
+          console.log("Looking at nonce:")
+          this.props.web3.eth.getTransactionCount(paramsObject.from).then((nonce) => {
+            console.log("nonce is ",nonce," this.state.txnonce is",this.state.txnonce)
+            paramsObject.nonce = nonce
+            if(this.state.txnonce>paramsObject.nonce){
+              paramsObject.nonce = this.state.txnonce
+            }
+            this.setState({txnonce:paramsObject.nonce+1})
+            console.log("TTTTTX",tx,paramsObject)
+            this.props.web3.eth.accounts.signTransaction(paramsObject, this.props.metaAccount.privateKey).then(signed => {
+                this.props.web3.eth.sendSignedTransaction(signed.rawTransaction).on('receipt', (receipt)=>{
+                  console.log("META RECEIPT",receipt)
+                  cb(receipt)
+                })
+            });
+          })
+
+
+
         }else{
 
 
