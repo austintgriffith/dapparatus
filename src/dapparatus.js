@@ -81,27 +81,18 @@ let burnMetaAccount = (skipReload)=>{
   }
 }
 
-function translateNetwork(network) {
-  switch (network) {
-    case 1:
-      return 'Mainnet'
-    case 2:
-      return 'Morden'
-    case 3:
-      return 'Ropsten'
-    case 4:
-      return 'Rinkeby'
-    case 42:
-      return 'Kovan'
-    case 99:
-      return 'POA'
-    case 100:
-      return 'xDai'
-    case 5777:
-      return 'Private'
-    default:
-      return 'Unknown';
+function translateNetwork(id) {
+  const networks = {
+    1:   'Mainnet',
+    2:   'Morden',
+    3:   'Ropsten',
+    4:   'Rinkeby',
+    42:  'Kovan',
+    99:  'POA',
+    100: 'xDai',
+    5777: 'Private',
   }
+  return networks[id] || 'Unknown'
 }
 
 class Dapparatus extends Component {
