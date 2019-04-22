@@ -52,7 +52,7 @@
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
     "url-loader": "^1.0.1",
-    "webpack": "^4.21.0",
+    "webpack": "4.2.0",
     "webpack-cli": "^3.1.2"
   },
   "dependencies": {

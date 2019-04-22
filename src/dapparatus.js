@@ -81,6 +81,20 @@ let burnMetaAccount = (skipReload)=>{
   }
 }
 
+function translateNetwork(id) {
+  const networks = {
+    1:   'Mainnet',
+    2:   'Morden',
+    3:   'Ropsten',
+    4:   'Rinkeby',
+    42:  'Kovan',
+    99:  'POA',
+    100: 'xDai',
+    5777: 'Private',
+  }
+  return networks[id] || 'Unknown'
+}
+
 class Dapparatus extends Component {
   constructor(props) {
     super(props);
@@ -642,25 +656,3 @@ class Dapparatus extends Component {
   }
 }
 export default Dapparatus;
-
-function translateNetwork(network) {
-  if (network == 5777) {
-    return 'Private';
-  } else if (network == 1) {
-    return 'Mainnet';
-  } else if (network == 2) {
-    return 'Morden';
-  } else if (network == 3) {
-    return 'Ropsten';
-  } else if (network == 4) {
-    return 'Rinkeby';
-  } else if (network == 42) {
-    return 'Kovan';
-  } else if (network == 99) {
-    return 'POA';
-  } else if (network == 100) {
-    return 'xDai';
-  } else {
-    return 'Unknown';
-  }
-}
