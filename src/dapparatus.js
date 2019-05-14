@@ -281,17 +281,19 @@ class Dapparatus extends Component {
             this.setState({ hasRequestedAccess: true},() => {
               this.props.onUpdate(Object.assign({}, this.state));
             });
-            try{
-              window.ethereum.enable().then(() => {
-                  //this reload was causing opera on android to constantly reload
-                 /////window.location.reload(true);
-                 this.props.onUpdate(Object.assign({}, this.state));
-              })
-            } catch (e) {
-              console.log(e);
-              this.setState({ status: 'private', network: network },() => {
-                this.props.onUpdate(Object.assign({}, this.state));
-              });
+            if (!this.state.config.ignoreWeb3Injection) {
+              try{ 
+                window.ethereum.enable().then(() => {
+                    //this reload was causing opera on android to constantly reload
+                   /////window.location.reload(true);
+                   this.props.onUpdate(Object.assign({}, this.state));
+                })
+              } catch (e) {
+                console.log(e);
+                this.setState({ status: 'private', network: network },() => {
+                  this.props.onUpdate(Object.assign({}, this.state));
+                });
+              }
             }
           }
           if (this.state.config.DEBUG) console.log('DAPPARATUS - no inject accounts - generate? ');

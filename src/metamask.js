@@ -110,7 +110,7 @@ class Metamask extends Component {
       }
     } else {
       if (this.state.config.DEBUG) console.log('METAMASK - yes web 3');
-      if (!this.state.hasRequestedAccess) { // Prevent multiple prompts
+      if (!this.state.hasRequestedAccess && !this.state.config.ignoreWeb3Injection) { // Prevent multiple prompts
         if (this.state.config.DEBUG) console.log('METAMASK - requesting access from user...');
         this.setState({ hasRequestedAccess: true},() => {
           this.props.onUpdate(this.state);
