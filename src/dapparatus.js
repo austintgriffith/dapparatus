@@ -108,7 +108,8 @@ class Dapparatus extends Component {
       metaAccount: false,
       burnMetaAccount: burnMetaAccount,
       web3Fellback: false,
-      hasRequestedAccess: false
+      hasRequestedAccess: false,
+      ignoreWeb3InjectionHappened: false
     };
   }
   componentDidUpdate() {
@@ -151,13 +152,16 @@ class Dapparatus extends Component {
     }*/
 
 
-    if (this.state.config.ignoreWeb3Injection || typeof window.web3 == 'undefined' || (typeof window.web3.version == "undefined" && typeof window.web3.eth == "undefined")) {
+    if ((this.state.config.ignoreWeb3Injection && !this.state.ignoreWeb3InjectionHappened )|| typeof window.web3 == 'undefined' || (typeof window.web3.version == "undefined" && typeof window.web3.eth == "undefined")) {
       console.log("NO WEB3 YET (or no web3.version / web3.eth)")
       if (this.state.config.DEBUG) console.log('DAPPARATUS - no web3');
       console.log('Connecting to web3 provider...');
       window.web3 = new Web3(this.props.fallbackWeb3Provider); //CORS ISSUES!//
       console.log("web3 loaded, reporting as 'fellback'")
       //window.web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws'))
+      if (this.state.config.ignoreWeb3Injection){
+        this.state.ignoreWeb3InjectionHappened = true;        
+      }
       if (this.state.status == 'loading') {
         this.setState({ web3Fellback:true, status: 'noweb3' }, () => {
           this.props.onUpdate(Object.assign({}, this.state));
