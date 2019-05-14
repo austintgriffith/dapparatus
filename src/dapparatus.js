@@ -62,6 +62,7 @@ defaultConfig.requiredNetwork = [
   'Mainnet',
   'Unknown' //allow local RPC for testing
 ];
+defaultConfig.ignoreWeb3Injection = false;
 
 let burnMetaAccount = (skipReload)=>{
   if(localStorage&&typeof localStorage.setItem == "function"){
@@ -150,10 +151,10 @@ class Dapparatus extends Component {
     }*/
 
 
-    if (typeof window.web3 == 'undefined' || (typeof window.web3.version == "undefined" && typeof window.web3.eth == "undefined")) {
+    if (this.state.config.ignoreWeb3Injection || typeof window.web3 == 'undefined' || (typeof window.web3.version == "undefined" && typeof window.web3.eth == "undefined")) {
       console.log("NO WEB3 YET (or no web3.version / web3.eth)")
       if (this.state.config.DEBUG) console.log('DAPPARATUS - no web3');
-      console.log('Connecting to infura...');
+      console.log('Connecting to web3 provider...');
       window.web3 = new Web3(this.props.fallbackWeb3Provider); //CORS ISSUES!//
       console.log("web3 loaded, reporting as 'fellback'")
       //window.web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws'))
