@@ -57,8 +57,10 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "bip39": "^2.6.0",
     "deepmerge": "^2.1.1",
     "ethereum-ens": "^0.7.4",
+    "ethereumjs-wallet": "^0.6.3",
     "idempotent-babel-polyfill": "^7.0.0",
     "md5": "^2.2.1",
     "prop-types": "^15.6.2",

@@ -8,6 +8,8 @@ import Blockies from 'react-blockies';
 import ENS from 'ethereum-ens';
 import Web3 from 'web3';
 import Button from './button.js';
+import pkutils from './pkutils.js';
+
 const queryString = require('query-string');
 
 let interval;
@@ -67,13 +69,9 @@ defaultConfig.ignoreWeb3Injection = false;
 let burnMetaAccount = (skipReload)=>{
   if(localStorage&&typeof localStorage.setItem == "function"){
     localStorage.setItem('metaPrivateKey',0)
-  }else{
-    const expires = new Date();
-    expires.setDate(expires.getDate()-1);
-    cookie.save('metaPrivateKey', 0, {
-      path: '/',
-      expires: expires
-    });
+    localStorage.setItem('metaPrivateKeyMnemonic',"")
+  }else {
+    console.error('localStorage not supported!!');
   }
   if(!skipReload){
     setTimeout(()=>{
@@ -187,44 +185,33 @@ class Dapparatus extends Component {
     }
 
     let queryParams = queryString.parse(window.location.search);
-    let metaPrivateKey
+    let metaPrivateKey;
+    let metaPrivateKeyMnemonic;
+
     if(this.props.newPrivateKey){
-      metaPrivateKey = this.props.newPrivateKey
+      metaPrivateKey = this.props.newPrivateKey;
+
       if(metaPrivateKey.indexOf("0x")!=0){
         metaPrivateKey="0x"+metaPrivateKey
       }
       //console.log("SAVING HARD CODED PRIVATE KEY",metaPrivateKey)
       if(localStorage&&typeof localStorage.setItem == "function"){
         localStorage.setItem('metaPrivateKey',metaPrivateKey)
+
+        if (this.props.newPrivateKeyMnemonic) {
+          localStorage.setItem('metaPrivateKeyMnemonic',this.props.newPrivateKeyMnemonic);
+        }
+        console.log('set PK ',metaPrivateKey , this.props.newPrivateKeyMnemonic);
       }else{
-        const expires = new Date();
-        expires.setDate(expires.getDate() + 365);
-        cookie.save('metaPrivateKey', metaPrivateKey, {
-          path: '/',
-          expires
-        });
+        console.error('no local Storage Supported!');
       }
       console.log("Clearing new private key...")
       this.setState({newPrivateKey:false})
-    }else if(localStorage&&typeof localStorage.setItem == "function"){
-      metaPrivateKey = localStorage.getItem('metaPrivateKey')
+    }else if(localStorage&&typeof localStorage.getItem == "function"){
+      metaPrivateKey = localStorage.getItem('metaPrivateKey');
       if(metaPrivateKey=="0") metaPrivateKey=false;
       if(metaPrivateKey && metaPrivateKey.length!==66) metaPrivateKey=false;
-    }
-    if(!metaPrivateKey){
-      metaPrivateKey = cookie.load('metaPrivateKey');
-      //what we need to do is convert someone over to localstorage from a cookie too...
-      //(we used to use cookies and we upgraded to localStorage)
-      if(metaPrivateKey && localStorage && typeof localStorage.setItem == "function"){
-        localStorage.setItem('metaPrivateKey',metaPrivateKey)
-        //now expire the cookie
-        const expires = new Date();
-        expires.setDate(expires.getDate()-1);
-        cookie.save('metaPrivateKey', 0, {
-          path: '/',
-          expires: expires
-        });
-      }
+      //metaPrivateKeyMnemonic = localStorage.getItem('metaPrivateKeyMnemonic');
     }
 
     let metaAccount;
@@ -238,12 +225,7 @@ class Dapparatus extends Component {
       if(localStorage&&typeof localStorage.setItem == "function"){
         localStorage.setItem('metaPrivateKey',queryParams.privateKey)
       }else{
-        const expires = new Date();
-        expires.setDate(expires.getDate() + 365);
-        cookie.save('metaPrivateKey', queryParams.privateKey, {
-          path: '/',
-          expires
-        });
+        console.error('no local storage supported!');
       }
       //window.location = window.location.href.split('?')[0];
     }
@@ -270,11 +252,11 @@ class Dapparatus extends Component {
       }
     }
     if (this.state.config.DEBUG) console.log('DAPPARATUS - translated network', network);
-    let accounts;
     try {
       if (this.state.config.DEBUG) console.log('DAPPARATUS - getting accounts...');
       window.web3.eth.getAccounts((err, _accounts) => {
-        //console.log("ACCOUNTS",err,_accounts)
+        console.log("ACCOUNTS",err,_accounts);
+        console.log("state",this.state)
         if (!_accounts || _accounts.length <= 0 || this.state.web3Fellback) {
           if (!this.state.hasRequestedAccess) { // Prevent multiple prompts
             if (this.state.config.DEBUG) console.log('METAMASK - requesting access from user...');
@@ -303,23 +285,29 @@ class Dapparatus extends Component {
                 console.log('Connecting to ' + this.state.config.metatxAccountGenerator + '...');
                 window.location = this.state.config.metatxAccountGenerator;
               } else {
-                console.log("Generating account...")
+                console.log("Generating account...");
+                
                 try{
-                  let result = window.web3.eth.accounts.create();
+                  console.log("require bip39...");
+                  const bip39 = require('bip39');
+                  console.log("bip39 found");
+                  bip39.debug = true;
+                  //generate  mnemonic here and get account from that.
+                  const mnemonic = bip39.generateMnemonic();
+                  console.log("mnemonic: " + mnemonic);
+                  const pk = pkutils.getPrivateKeyFromMnemonic(mnemonic);
+                  console.log("pk: " + pk);
+                  let result = window.web3.eth.accounts.privateKeyToAccount(pk);
+                  console.log('address:' + result.address);
                   if(localStorage&&typeof localStorage.setItem == "function"){
-                    localStorage.setItem('metaPrivateKey',result.privateKey)
+                    localStorage.setItem('metaPrivateKey',result.privateKey);
+                    localStorage.setItem('metaPrivateKeyMnemonic', mnemonic);
                   }else{
-                    const expires = new Date();
-                    expires.setDate(expires.getDate() + 365);
-                    cookie.save('metaPrivateKey', result.privateKey, {
-                      path: '/',
-                      expires
-                    });
+                    console.error('localStorage not supported!!');
                   }
                   let metaPrivateKey = result.privateKey
                   let tempweb3 = new Web3();
                   let metaAccount = tempweb3.eth.accounts.privateKeyToAccount(metaPrivateKey);
-                  let account = metaAccount.address.toLowerCase();
 
                   this.setState({ metaAccount: result, account: result.address.toLowerCase(), burnMetaAccount:burnMetaAccount },()=>{
                     this.props.onUpdate(Object.assign({}, this.state));
