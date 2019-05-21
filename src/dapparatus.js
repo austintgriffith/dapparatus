@@ -295,7 +295,7 @@ class Dapparatus extends Component {
                   //generate  mnemonic here and get account from that.
                   const mnemonic = bip39.generateMnemonic();
                   console.log("mnemonic: " + mnemonic);
-                  const pk = pkutils.getPrivateKeyFromMnemonic(mnemonic);
+                  const pk = "0x" + pkutils.getPrivateKeyFromMnemonic(mnemonic);
                   console.log("pk: " + pk);
                   let result = window.web3.eth.accounts.privateKeyToAccount(pk);
                   console.log('address:' + result.address);
