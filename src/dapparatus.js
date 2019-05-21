@@ -211,7 +211,7 @@ class Dapparatus extends Component {
       metaPrivateKey = localStorage.getItem('metaPrivateKey');
       if(metaPrivateKey=="0") metaPrivateKey=false;
       if(metaPrivateKey && metaPrivateKey.length!==66) metaPrivateKey=false;
-      //metaPrivateKeyMnemonic = localStorage.getItem('metaPrivateKeyMnemonic');
+      
     }
 
     let metaAccount;
