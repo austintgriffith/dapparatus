@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import cookie from 'react-cookies';
 import deepmerge from 'deepmerge';
 import logo from './assets/metamask.png';
 import eth from './assets/ethereum.png';
@@ -7,7 +6,8 @@ import Scaler from './scaler.js';
 import Blockies from 'react-blockies';
 import ENS from 'ethereum-ens';
 import Web3 from 'web3';
-import Button from './button.js';
+import pkutils from './pkutils.js';
+
 const queryString = require('query-string');
 
 let interval;
@@ -67,13 +67,9 @@ defaultConfig.ignoreWeb3Injection = false;
 let burnMetaAccount = (skipReload)=>{
   if(localStorage&&typeof localStorage.setItem == "function"){
     localStorage.setItem('metaPrivateKey',0)
-  }else{
-    const expires = new Date();
-    expires.setDate(expires.getDate()-1);
-    cookie.save('metaPrivateKey', 0, {
-      path: '/',
-      expires: expires
-    });
+    localStorage.setItem('metaPrivateKeyMnemonic',"")
+  }else {
+    console.error('localStorage not supported!!');
   }
   if(!skipReload){
     setTimeout(()=>{
@@ -122,11 +118,18 @@ class Dapparatus extends Component {
     }
   }
   componentDidMount() {
-    interval = setInterval(
-      this.checkMetamask.bind(this),
-      this.state.config.POLLINTERVAL
-    );
-    this.checkMetamask();
+
+    if (localStorage&&typeof localStorage.setItem == 'function') {
+      console.log('Starting polling for metamask');
+      interval = setInterval(
+        this.checkMetamask.bind(this),
+        this.state.config.POLLINTERVAL
+      );
+      this.checkMetamask();    
+    } else {
+      console.error('Local Storage not supported!!');
+      alert('Local Storage is not supported on this browser. Please use an up to date browser.');
+    }
   }
   componentWillUnmount() {
     clearInterval(interval);
@@ -187,44 +190,28 @@ class Dapparatus extends Component {
     }
 
     let queryParams = queryString.parse(window.location.search);
-    let metaPrivateKey
+    let metaPrivateKey;
+    let metaPrivateKeyMnemonic;
+
     if(this.props.newPrivateKey){
-      metaPrivateKey = this.props.newPrivateKey
+      metaPrivateKey = this.props.newPrivateKey;
+
       if(metaPrivateKey.indexOf("0x")!=0){
         metaPrivateKey="0x"+metaPrivateKey
       }
       //console.log("SAVING HARD CODED PRIVATE KEY",metaPrivateKey)
-      if(localStorage&&typeof localStorage.setItem == "function"){
-        localStorage.setItem('metaPrivateKey',metaPrivateKey)
-      }else{
-        const expires = new Date();
-        expires.setDate(expires.getDate() + 365);
-        cookie.save('metaPrivateKey', metaPrivateKey, {
-          path: '/',
-          expires
-        });
+      localStorage.setItem('metaPrivateKey',metaPrivateKey)
+      if (this.props.newPrivateKeyMnemonic) {
+        localStorage.setItem('metaPrivateKeyMnemonic',this.props.newPrivateKeyMnemonic);
       }
-      console.log("Clearing new private key...")
+      console.log('set PK ',metaPrivateKey , this.props.newPrivateKeyMnemonic);
+      console.log("clearing new private key...")
       this.setState({newPrivateKey:false})
-    }else if(localStorage&&typeof localStorage.setItem == "function"){
-      metaPrivateKey = localStorage.getItem('metaPrivateKey')
+    }else {
+      metaPrivateKey = localStorage.getItem('metaPrivateKey');
       if(metaPrivateKey=="0") metaPrivateKey=false;
       if(metaPrivateKey && metaPrivateKey.length!==66) metaPrivateKey=false;
-    }
-    if(!metaPrivateKey){
-      metaPrivateKey = cookie.load('metaPrivateKey');
-      //what we need to do is convert someone over to localstorage from a cookie too...
-      //(we used to use cookies and we upgraded to localStorage)
-      if(metaPrivateKey && localStorage && typeof localStorage.setItem == "function"){
-        localStorage.setItem('metaPrivateKey',metaPrivateKey)
-        //now expire the cookie
-        const expires = new Date();
-        expires.setDate(expires.getDate()-1);
-        cookie.save('metaPrivateKey', 0, {
-          path: '/',
-          expires: expires
-        });
-      }
+      
     }
 
     let metaAccount;
@@ -235,16 +222,7 @@ class Dapparatus extends Component {
       account = metaAccount.address.toLowerCase();
     } else if (queryParams.privateKey) {
       metaPrivateKey = queryParams.privateKey
-      if(localStorage&&typeof localStorage.setItem == "function"){
-        localStorage.setItem('metaPrivateKey',queryParams.privateKey)
-      }else{
-        const expires = new Date();
-        expires.setDate(expires.getDate() + 365);
-        cookie.save('metaPrivateKey', queryParams.privateKey, {
-          path: '/',
-          expires
-        });
-      }
+      localStorage.setItem('metaPrivateKey',queryParams.privateKey);
       //window.location = window.location.href.split('?')[0];
     }
     if(account && account!=this.state.account){
@@ -270,11 +248,11 @@ class Dapparatus extends Component {
       }
     }
     if (this.state.config.DEBUG) console.log('DAPPARATUS - translated network', network);
-    let accounts;
     try {
       if (this.state.config.DEBUG) console.log('DAPPARATUS - getting accounts...');
       window.web3.eth.getAccounts((err, _accounts) => {
-        //console.log("ACCOUNTS",err,_accounts)
+        console.log("ACCOUNTS",err,_accounts);
+        console.log("state",this.state)
         if (!_accounts || _accounts.length <= 0 || this.state.web3Fellback) {
           if (!this.state.hasRequestedAccess) { // Prevent multiple prompts
             if (this.state.config.DEBUG) console.log('METAMASK - requesting access from user...');
@@ -303,24 +281,21 @@ class Dapparatus extends Component {
                 console.log('Connecting to ' + this.state.config.metatxAccountGenerator + '...');
                 window.location = this.state.config.metatxAccountGenerator;
               } else {
-                console.log("Generating account...")
+                console.log("Generating account...");
+                
                 try{
-                  let result = window.web3.eth.accounts.create();
-                  if(localStorage&&typeof localStorage.setItem == "function"){
-                    localStorage.setItem('metaPrivateKey',result.privateKey)
-                  }else{
-                    const expires = new Date();
-                    expires.setDate(expires.getDate() + 365);
-                    cookie.save('metaPrivateKey', result.privateKey, {
-                      path: '/',
-                      expires
-                    });
-                  }
-                  let metaPrivateKey = result.privateKey
-                  let tempweb3 = new Web3();
-                  let metaAccount = tempweb3.eth.accounts.privateKeyToAccount(metaPrivateKey);
-                  let account = metaAccount.address.toLowerCase();
-
+                  const bip39 = require('bip39');
+                  bip39.debug = true;
+                  //generate  mnemonic here and get account from that.
+                  const mnemonic = bip39.generateMnemonic();
+                  //console.log("mnemonic: " + mnemonic);
+                  const pk = "0x" + pkutils.getPrivateKeyFromMnemonic(mnemonic);
+                  //console.log("pk: " + pk);
+                  let result = window.web3.eth.accounts.privateKeyToAccount(pk);
+                  //console.log('address:' + result.address);
+                  localStorage.setItem('metaPrivateKey',result.privateKey);
+                  localStorage.setItem('metaPrivateKeyMnemonic', mnemonic);
+                  
                   this.setState({ metaAccount: result, account: result.address.toLowerCase(), burnMetaAccount:burnMetaAccount },()=>{
                     this.props.onUpdate(Object.assign({}, this.state));
                   });
