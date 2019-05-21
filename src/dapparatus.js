@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import cookie from 'react-cookies';
 import deepmerge from 'deepmerge';
 import logo from './assets/metamask.png';
 import eth from './assets/ethereum.png';
@@ -7,7 +6,6 @@ import Scaler from './scaler.js';
 import Blockies from 'react-blockies';
 import ENS from 'ethereum-ens';
 import Web3 from 'web3';
-import Button from './button.js';
 import pkutils from './pkutils.js';
 
 const queryString = require('query-string');
@@ -195,17 +193,13 @@ class Dapparatus extends Component {
         metaPrivateKey="0x"+metaPrivateKey
       }
       //console.log("SAVING HARD CODED PRIVATE KEY",metaPrivateKey)
-      if(localStorage&&typeof localStorage.setItem == "function"){
-        localStorage.setItem('metaPrivateKey',metaPrivateKey)
-
-        if (this.props.newPrivateKeyMnemonic) {
-          localStorage.setItem('metaPrivateKeyMnemonic',this.props.newPrivateKeyMnemonic);
-        }
-        console.log('set PK ',metaPrivateKey , this.props.newPrivateKeyMnemonic);
-      }else{
-        console.error('no local Storage Supported!');
+      console.assert(localStorage&&typeof localStorage.setItem == "function", 'localStorage not supported!!');
+      localStorage.setItem('metaPrivateKey',metaPrivateKey)
+      if (this.props.newPrivateKeyMnemonic) {
+        localStorage.setItem('metaPrivateKeyMnemonic',this.props.newPrivateKeyMnemonic);
       }
-      console.log("Clearing new private key...")
+      console.log('set PK ',metaPrivateKey , this.props.newPrivateKeyMnemonic);
+      console.log("clearing new private key...")
       this.setState({newPrivateKey:false})
     }else if(localStorage&&typeof localStorage.getItem == "function"){
       metaPrivateKey = localStorage.getItem('metaPrivateKey');
@@ -222,11 +216,8 @@ class Dapparatus extends Component {
       account = metaAccount.address.toLowerCase();
     } else if (queryParams.privateKey) {
       metaPrivateKey = queryParams.privateKey
-      if(localStorage&&typeof localStorage.setItem == "function"){
-        localStorage.setItem('metaPrivateKey',queryParams.privateKey)
-      }else{
-        console.error('no local storage supported!');
-      }
+      console.assert(localStorage&&typeof localStorage.setItem == "function", 'localStorage not supported!!');
+      localStorage.setItem('metaPrivateKey',queryParams.privateKey);
       //window.location = window.location.href.split('?')[0];
     }
     if(account && account!=this.state.account){
@@ -288,27 +279,19 @@ class Dapparatus extends Component {
                 console.log("Generating account...");
                 
                 try{
-                  console.log("require bip39...");
                   const bip39 = require('bip39');
-                  console.log("bip39 found");
                   bip39.debug = true;
                   //generate  mnemonic here and get account from that.
                   const mnemonic = bip39.generateMnemonic();
-                  console.log("mnemonic: " + mnemonic);
+                  //console.log("mnemonic: " + mnemonic);
                   const pk = "0x" + pkutils.getPrivateKeyFromMnemonic(mnemonic);
-                  console.log("pk: " + pk);
+                  //console.log("pk: " + pk);
                   let result = window.web3.eth.accounts.privateKeyToAccount(pk);
-                  console.log('address:' + result.address);
-                  if(localStorage&&typeof localStorage.setItem == "function"){
-                    localStorage.setItem('metaPrivateKey',result.privateKey);
-                    localStorage.setItem('metaPrivateKeyMnemonic', mnemonic);
-                  }else{
-                    console.error('localStorage not supported!!');
-                  }
-                  let metaPrivateKey = result.privateKey
-                  let tempweb3 = new Web3();
-                  let metaAccount = tempweb3.eth.accounts.privateKeyToAccount(metaPrivateKey);
-
+                  //console.log('address:' + result.address);
+                  console.assert(localStorage&&typeof localStorage.setItem == "function", 'localStorage not supported!!');
+                  localStorage.setItem('metaPrivateKey',result.privateKey);
+                  localStorage.setItem('metaPrivateKeyMnemonic', mnemonic);
+                  
                   this.setState({ metaAccount: result, account: result.address.toLowerCase(), burnMetaAccount:burnMetaAccount },()=>{
                     this.props.onUpdate(Object.assign({}, this.state));
                   });
