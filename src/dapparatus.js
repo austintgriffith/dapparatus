@@ -118,11 +118,18 @@ class Dapparatus extends Component {
     }
   }
   componentDidMount() {
-    interval = setInterval(
-      this.checkMetamask.bind(this),
-      this.state.config.POLLINTERVAL
-    );
-    this.checkMetamask();
+
+    if (localStorage&&typeof localStorage.setItem == 'function') {
+      console.log('Starting polling for metamask');
+      interval = setInterval(
+        this.checkMetamask.bind(this),
+        this.state.config.POLLINTERVAL
+      );
+      this.checkMetamask();    
+    } else {
+      console.error('Local Storage not supported!!');
+      alert('Local Storage is not supported on this browser. Please use an up to date browser.');
+    }
   }
   componentWillUnmount() {
     clearInterval(interval);
@@ -193,7 +200,6 @@ class Dapparatus extends Component {
         metaPrivateKey="0x"+metaPrivateKey
       }
       //console.log("SAVING HARD CODED PRIVATE KEY",metaPrivateKey)
-      console.assert(localStorage&&typeof localStorage.setItem == "function", 'localStorage not supported!!');
       localStorage.setItem('metaPrivateKey',metaPrivateKey)
       if (this.props.newPrivateKeyMnemonic) {
         localStorage.setItem('metaPrivateKeyMnemonic',this.props.newPrivateKeyMnemonic);
@@ -201,7 +207,7 @@ class Dapparatus extends Component {
       console.log('set PK ',metaPrivateKey , this.props.newPrivateKeyMnemonic);
       console.log("clearing new private key...")
       this.setState({newPrivateKey:false})
-    }else if(localStorage&&typeof localStorage.getItem == "function"){
+    }else {
       metaPrivateKey = localStorage.getItem('metaPrivateKey');
       if(metaPrivateKey=="0") metaPrivateKey=false;
       if(metaPrivateKey && metaPrivateKey.length!==66) metaPrivateKey=false;
@@ -216,7 +222,6 @@ class Dapparatus extends Component {
       account = metaAccount.address.toLowerCase();
     } else if (queryParams.privateKey) {
       metaPrivateKey = queryParams.privateKey
-      console.assert(localStorage&&typeof localStorage.setItem == "function", 'localStorage not supported!!');
       localStorage.setItem('metaPrivateKey',queryParams.privateKey);
       //window.location = window.location.href.split('?')[0];
     }
@@ -288,7 +293,6 @@ class Dapparatus extends Component {
                   //console.log("pk: " + pk);
                   let result = window.web3.eth.accounts.privateKeyToAccount(pk);
                   //console.log('address:' + result.address);
-                  console.assert(localStorage&&typeof localStorage.setItem == "function", 'localStorage not supported!!');
                   localStorage.setItem('metaPrivateKey',result.privateKey);
                   localStorage.setItem('metaPrivateKeyMnemonic', mnemonic);
                   
