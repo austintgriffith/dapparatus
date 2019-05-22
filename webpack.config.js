@@ -40,6 +40,8 @@ module.exports = {
   },
   externals: {
     'react': 'react',
-    'react-dom': 'react-dom'
+    'react-dom': 'react-dom',
+    'web3': 'web3',
+    'web3-utils': 'web3-utils'
   }
 };
