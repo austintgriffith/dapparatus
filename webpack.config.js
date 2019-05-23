@@ -1,11 +1,27 @@
 var path = require('path');
+var fs = require('fs');
 
 module.exports = {
   mode: 'production',
-  entry: ['./src/index.js'],
+  entry: {
+    index: './src/index.js',
+    dapparatus: './src/dapparatus.js',
+    gas: './src/gas.js',
+    metamask: './src/metamask.js',
+    transactions: './src/transactions.js',
+    contractloader: './src/contractloader.js',
+    events: './src/events.js',
+    scaler: './src/scaler.js',
+    blockie: './src/blockie.js',
+    address: './src/address.js',
+    button: './src/button.js',
+    qrcodescanner: './src/qrcodescanner/index.js',
+    qrcodedisplay: './src/qrcodedisplay/index.js',
+    erc20icon: './src/erc20icon.js',
+  },
   output: {
     path: path.resolve(__dirname, 'build'),
-    filename: 'index.js',
+    filename: '[name].js',
     libraryTarget: 'umd'
   },
   module: {
@@ -38,10 +54,8 @@ module.exports = {
       }
     ]
   },
-  externals: {
-    'react': 'react',
-    'react-dom': 'react-dom',
-    'web3': 'web3',
-    'web3-utils': 'web3-utils'
-  }
+  externals: fs.readdirSync('node_modules').reduce((externals, module) => {
+    externals[module] = module;
+    return externals;
+  }, {}),
 };
