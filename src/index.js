@@ -1,9 +1,6 @@
-import 'idempotent-babel-polyfill';
-
 import Dapparatus from './dapparatus';
 import Gas from './gas';
 import Metamask from './metamask';
-import Web3 from './metamask';
 import Transactions from './transactions';
 import ContractLoader from './contractloader';
 import Events from './events';
