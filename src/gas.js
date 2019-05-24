@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import axios from "axios"
 import deepmerge from 'deepmerge';
 const GASBOOSTPRICE = 0.05 //gwei
 
@@ -37,15 +36,18 @@ class Gas extends Component {
   checkOnGasPrices(){
     if(this.props.network && this.props.network == "Mainnet"){
       if(!this.state.config.hardcodedGwei){
-        axios.get("https://ethgasstation.info/json/ethgasAPI.json", { crossdomain: true })
-        .catch((err)=>{
-          console.log("Error getting gas price",err)
+        fetch('https://ethgasstation.info/json/ethgasAPI.json', {
+          mode: 'cors'
         })
+        .catch((err)=>{
+          console.log('Error getting gas price', err)
+        })
+        .then(r => r.json())
         .then((response)=>{
-          if(response && response.data.average>0&&response.data.average<200){
-            response.data.average=response.data.average + (response.data.average*GASBOOSTPRICE)
-            let setMainGasTo = Math.round(response.data.average*100)/1000
-            if(this.state.gwei!=setMainGasTo){
+          if(response.average>0&&response.average<200){
+            response.average=response.average + (response.average*GASBOOSTPRICE)
+            let setMainGasTo = Math.round(response.average*100)/1000
+            if(this.state.gwei !== setMainGasTo){
               let update = {gwei:setMainGasTo}
               this.setState(update)
               this.props.onUpdate(update)
