@@ -191,7 +191,7 @@ class Dapparatus extends Component {
 
     let queryParams = queryString.parse(window.location.search);
     let metaPrivateKey;
-    let metaPrivateKeyMnemonic;
+    //let metaPrivateKeyMnemonic;
 
     if(this.props.newPrivateKey){
       metaPrivateKey = this.props.newPrivateKey;
@@ -202,10 +202,13 @@ class Dapparatus extends Component {
       //console.log("SAVING HARD CODED PRIVATE KEY",metaPrivateKey)
       localStorage.setItem('metaPrivateKey',metaPrivateKey)
       if (this.props.newPrivateKeyMnemonic) {
+        //console.log("setting private key Mnemonic:" + this.props.newPrivateKeyMnemonic);
         localStorage.setItem('metaPrivateKeyMnemonic',this.props.newPrivateKeyMnemonic);
+      } else {
+        if (this.state.config.DEBUG) console.log("removing metaPrivateKeyMnemonic from localStorage ...")
+        localStorage.removeItem('metaPrivateKeyMnemonic');
       }
-      console.log('set PK ',metaPrivateKey , this.props.newPrivateKeyMnemonic);
-      console.log("clearing new private key...")
+      if (this.state.config.DEBUG) console.log("clearing new private key...");
       this.setState({newPrivateKey:false})
     }else {
       metaPrivateKey = localStorage.getItem('metaPrivateKey');
@@ -251,8 +254,10 @@ class Dapparatus extends Component {
     try {
       if (this.state.config.DEBUG) console.log('DAPPARATUS - getting accounts...');
       window.web3.eth.getAccounts((err, _accounts) => {
-        console.log("ACCOUNTS",err,_accounts);
-        console.log("state",this.state)
+        if (this.state.config.DEBUG) {
+          console.log("ACCOUNTS",err,_accounts);
+          console.log("state",this.state)
+        }
         if (!_accounts || _accounts.length <= 0 || this.state.web3Fellback) {
           if (!this.state.hasRequestedAccess) { // Prevent multiple prompts
             if (this.state.config.DEBUG) console.log('METAMASK - requesting access from user...');
