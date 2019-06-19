@@ -113,6 +113,12 @@ class Transactions extends Component {
         if(typeof maxGasLimit == "function"){
           callback = maxGasLimit
         }
+        if(typeof value == "function"){
+          callback = value
+        }
+        if(typeof txData == "function"){
+          callback = txData
+        }
 
         if(!value) value=0
 

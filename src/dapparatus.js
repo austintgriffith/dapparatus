@@ -12,7 +12,7 @@ const queryString = require('query-string');
 
 let interval;
 let defaultConfig = {};
-defaultConfig.DEBUG = false;
+defaultConfig.DEBUG = true;
 defaultConfig.POLLINTERVAL = 1777;
 defaultConfig.showBalance = true;
 
@@ -62,7 +62,7 @@ defaultConfig.requiredNetwork = [
   'Mainnet',
   'Unknown' //allow local RPC for testing
 ];
-
+/*
 let burnMetaAccount = (skipReload)=>{
   if(localStorage&&typeof localStorage.setItem == "function"){
     localStorage.setItem('metaPrivateKey',0)
@@ -80,7 +80,7 @@ let burnMetaAccount = (skipReload)=>{
     },300)
   }
 }
-
+*/
 function translateNetwork(id) {
   const networks = {
     1:   'Mainnet',
@@ -119,7 +119,7 @@ class Dapparatus extends Component {
       avgBlockTime: 15000,
       lastBlockTime: 0,
       metaAccount: false,
-      burnMetaAccount: burnMetaAccount,
+    /*  burnMetaAccount: burnMetaAccount, */
       web3Fellback: false,
       hasRequestedAccess: false
     };
@@ -260,7 +260,7 @@ class Dapparatus extends Component {
       }
       //window.location = window.location.href.split('?')[0];
     }
-    if(account && account!=this.state.account){
+    if(!this.state.account && account){
       this.setState({account,metaAccount},()=>{
         console.log("DAPP ONUPDATE",this.state)
         this.props.onUpdate(Object.assign({}, this.state));
@@ -310,30 +310,44 @@ class Dapparatus extends Component {
                 console.log('Connecting to ' + this.state.config.metatxAccountGenerator + '...');
                 window.location = this.state.config.metatxAccountGenerator;
               } else {
-                console.log("Generating account...")
+
                 try{
-                  let result = window.web3.eth.accounts.create();
+
+                  let metaPrivateKey
                   if(localStorage&&typeof localStorage.setItem == "function"){
-                    localStorage.setItem('metaPrivateKey',result.privateKey)
-                  }else{
-                    const expires = new Date();
-                    expires.setDate(expires.getDate() + 365);
-                    cookie.save('metaPrivateKey', result.privateKey, {
-                      path: '/',
-                      expires
-                    });
+                    metaPrivateKey = localStorage.getItem('metaPrivateKey')
+                    if(metaPrivateKey=="0") metaPrivateKey=false;
+                    if(metaPrivateKey && metaPrivateKey.length!==66) metaPrivateKey=false;
                   }
-                  let metaPrivateKey = result.privateKey
+                  if(!metaPrivateKey){
+                    console.log("Generating account...")
+                    let result = window.web3.eth.accounts.create();
+                    if(localStorage&&typeof localStorage.setItem == "function"){
+                      localStorage.setItem('metaPrivateKey',result.privateKey)
+                    }else{
+                      const expires = new Date();
+                      expires.setDate(expires.getDate() + 365);
+                      cookie.save('metaPrivateKey', result.privateKey, {
+                        path: '/',
+                        expires
+                      });
+                    }
+                    metaPrivateKey = result.privateKey
+                  }else{
+                    console.log("Loaded existing metaPK...")
+                  }
+
                   let tempweb3 = new Web3();
                   let metaAccount = tempweb3.eth.accounts.privateKeyToAccount(metaPrivateKey);
                   let account = metaAccount.address.toLowerCase();
 
-                  this.setState({ metaAccount: result, account: result.address.toLowerCase(), burnMetaAccount:burnMetaAccount },()=>{
+                  this.setState({ metaAccount: metaAccount, account: account/*, burnMetaAccount:burnMetaAccount*/ },()=>{
                     this.props.onUpdate(Object.assign({}, this.state));
                   });
                 }catch(e){
                   console.log(e)
                 }
+
               }
             });
           } else {
@@ -356,7 +370,7 @@ class Dapparatus extends Component {
 
           //there is a strange bug where we end up with a meta account and then web3 is injected
           //What I want to do here is clear any localstorage if web3 is injected
-          burnMetaAccount(true)
+          //burnMetaAccount(true)
 
           this.inspectAccounts(_accounts, network);
           this.setState({ metaAccount: false });
