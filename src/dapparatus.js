@@ -62,7 +62,7 @@ defaultConfig.requiredNetwork = [
   'Mainnet',
   'Unknown' //allow local RPC for testing
 ];
-/*
+
 let burnMetaAccount = (skipReload)=>{
   if(localStorage&&typeof localStorage.setItem == "function"){
     localStorage.setItem('metaPrivateKey',0)
@@ -73,6 +73,10 @@ let burnMetaAccount = (skipReload)=>{
       path: '/',
       expires: expires
     });
+    cookie.save('safe', 0, {
+      path: '/',
+      expires: expires
+    });
   }
   if(!skipReload){
     setTimeout(()=>{
@@ -80,7 +84,6 @@ let burnMetaAccount = (skipReload)=>{
     },300)
   }
 }
-*/
 function translateNetwork(id) {
   const networks = {
     1:   'Mainnet',
@@ -119,7 +122,7 @@ class Dapparatus extends Component {
       avgBlockTime: 15000,
       lastBlockTime: 0,
       metaAccount: false,
-    /*  burnMetaAccount: burnMetaAccount, */
+      burnMetaAccount: burnMetaAccount,
       web3Fellback: false,
       hasRequestedAccess: false
     };
@@ -341,7 +344,7 @@ class Dapparatus extends Component {
                   let metaAccount = tempweb3.eth.accounts.privateKeyToAccount(metaPrivateKey);
                   let account = metaAccount.address.toLowerCase();
 
-                  this.setState({ metaAccount: metaAccount, account: account/*, burnMetaAccount:burnMetaAccount*/ },()=>{
+                  this.setState({ metaAccount: metaAccount, account: account, burnMetaAccount:burnMetaAccount },()=>{
                     this.props.onUpdate(Object.assign({}, this.state));
                   });
                 }catch(e){
