@@ -73,10 +73,6 @@ let burnMetaAccount = (skipReload)=>{
       path: '/',
       expires: expires
     });
-    cookie.save('safe', 0, {
-      path: '/',
-      expires: expires
-    });
   }
   if(!skipReload){
     setTimeout(()=>{
