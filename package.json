@@ -1,6 +1,6 @@
 {
   "name": "dapparatus",
-  "version": "1.0.78",
+  "version": "1.0.79",
   "description": "reusable dapp components in react: metamask, automatic gas, transaction ui, event parers etc...",
   "main": "build/index.js",
   "scripts": {
