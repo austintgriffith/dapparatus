@@ -12,7 +12,7 @@ const queryString = require('query-string');
 
 let interval;
 let defaultConfig = {};
-defaultConfig.DEBUG = true;
+defaultConfig.DEBUG = false;
 defaultConfig.POLLINTERVAL = 1777;
 defaultConfig.showBalance = true;
 
