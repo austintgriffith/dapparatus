@@ -201,6 +201,7 @@ class Dapparatus extends Component {
     let queryParams = queryString.parse(window.location.search);
     let metaPrivateKey
     if(this.props.newPrivateKey){
+      console.log("DAPPARATUS - NEW PRIVATE KEY")
       metaPrivateKey = this.props.newPrivateKey
       if(metaPrivateKey.indexOf("0x")!=0){
         metaPrivateKey="0x"+metaPrivateKey
@@ -217,7 +218,10 @@ class Dapparatus extends Component {
         });
       }
       console.log("Clearing new private key...")
-      this.setState({newPrivateKey:false})
+      this.setState({newPrivateKey:false},()=>{
+        //this is clunky, but reload once they enter a pk for now
+        window.location = "/"
+      })
     }else if(localStorage&&typeof localStorage.setItem == "function"){
       metaPrivateKey = localStorage.getItem('metaPrivateKey')
       if(metaPrivateKey=="0") metaPrivateKey=false;
