@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "base64url": "^3.0.1",
     "deepmerge": "^2.1.1",
     "ethereum-ens": "^0.7.4",
     "idempotent-babel-polyfill": "^7.0.0",

@@ -14,7 +14,7 @@ import Button from './button';
 import QRCodeScanner from './qrcodescanner';
 import QRCodeDisplay from './qrcodedisplay';
 import ERC20Icon from './erc20icon';
-
+import PrivateKeyCatcher from './privatekeycatcher';
 /*
 export default {
   Dapparatus,
@@ -46,3 +46,4 @@ module.exports['Dapparatus'] = Dapparatus;
 module.exports['QRCodeScanner'] = QRCodeScanner;
 module.exports['QRCodeDisplay'] = QRCodeDisplay;
 module.exports['ERC20Icon'] = ERC20Icon;
+module.exports['PrivateKeyCatcher'] = PrivateKeyCatcher;
