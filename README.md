@@ -42,6 +42,7 @@ const WEB3_PROVIDER = 'http://0.0.0.0:8545'
     hide:false
   }}
   metatx={METATX}
+  newPrivateKey={this.state.newPrivateKey}
   fallbackWeb3Provider={new Web3.providers.HttpProvider(WEB3_PROVIDER)}
   onUpdate={(state)=>{
    console.log("metamask state update:",state)
