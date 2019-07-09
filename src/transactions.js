@@ -99,7 +99,7 @@ class Transactions extends Component {
         if(this.state.config.DEBUG) console.log("YOU WANT TO SEND TX ",tx,this.props.gwei)
         let callback = cb
 
-        console.log("==MM meta:",this.props.metaAccount)
+        if(this.state.config.DEBUG) console.log("==MM meta:",this.props.metaAccount)
         let gasLimit
         if(typeof maxGasLimit != "function"){
           gasLimit = maxGasLimit
@@ -110,6 +110,7 @@ class Transactions extends Component {
             gasLimit = this.state.DEFAULTGASLIMIT
           }
         }
+        if(this.state.config.DEBUG) console.log("gasLimit:",gasLimit)
         if(typeof maxGasLimit == "function"){
           callback = maxGasLimit
         }
@@ -119,6 +120,7 @@ class Transactions extends Component {
         if(typeof txData == "function"){
           callback = txData
         }
+
 
         if(!value) value=0
 
@@ -142,6 +144,8 @@ class Transactions extends Component {
           paramsObject.data = txData
         }
 
+        if(this.state.config.DEBUG) console.log("callback:",callback)
+
         if(this.props.metaAccount&&this.props.metatx){
           console.log("================&&&& metaAccount, send as metatx to relayer to contract :",this.props.metatx.contract)
           let _value = 0
@@ -156,6 +160,9 @@ class Transactions extends Component {
           paramsObject.to = tx._parent._address
           paramsObject.data = tx.encodeABI()
 
+          console.log("DATA",paramsObject.data)
+
+          delete paramsObject.chainId
 
           console.log("Looking at nonce:")
           this.props.web3.eth.getTransactionCount(paramsObject.from).then((nonce) => {
@@ -169,7 +176,7 @@ class Transactions extends Component {
             this.props.web3.eth.accounts.signTransaction(paramsObject, this.props.metaAccount.privateKey).then(signed => {
                 this.props.web3.eth.sendSignedTransaction(signed.rawTransaction).on('receipt', (receipt)=>{
                   console.log("META RECEIPT",receipt)
-                  cb(receipt)
+                  callback(receipt)
                 })
             });
           })
@@ -181,6 +188,7 @@ class Transactions extends Component {
 
           if(this.state.config.DEBUG) console.log("gasLimit",gasLimit)
           if(this.state.config.DEBUG) console.log("this.props.gwei",this.props.gwei)
+          console.log("TXTXTXTXTX ",paramsObject)
           tx.send(paramsObject,(error, transactionHash)=>{
             if(this.state.config.DEBUG) console.log("TX CALLBACK",error,transactionHash)
             let currentTransactions = this.state.transactions
