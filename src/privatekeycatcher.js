@@ -9,7 +9,14 @@ export default class PrivateKeyCatcher extends React.Component {
       if(window.location.pathname.indexOf("/pk")>=0){
         let tempweb3 = new Web3();
         let base64encodedPK = window.location.hash.replace("#","")
-        let rawPK = tempweb3.utils.bytesToHex(base64url.toBuffer(base64encodedPK))
+        let rawPK
+        if(base64encodedPK.length==64||base64encodedPK.length==66){
+          console.log("raw pk ",base64encodedPK)
+          rawPK=base64encodedPK
+        }else{
+          rawPK=tempweb3.utils.bytesToHex(base64url.toBuffer(base64encodedPK))
+        }
+
         if(typeof this.props.newPrivateKey == "function"){
           this.props.newPrivateKey(rawPK)
         }else{
