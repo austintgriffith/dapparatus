@@ -8,6 +8,7 @@ import Blockies from 'react-blockies';
 import ENS from 'ethereum-ens';
 import Web3 from 'web3';
 import Button from './button.js';
+//import burnerloader from './assets/burnerloader.gif';
 const queryString = require('query-string');
 
 let interval;
@@ -519,13 +520,13 @@ class Dapparatus extends Component {
       );
     } else if (this.state.status == 'noweb3') {
       dapparatus = (
-        <a target="_blank" href="https://metamask.io/">
-          <span style={this.state.config.textStyle}>No Web3 Connection</span>
+        <div>
+          <span style={this.state.config.textStyle}>Connecting</span>
           <img
             style={{ maxHeight: 45, padding: 5, verticalAlign: 'middle' }}
-            src={logo}
+            src={eth}
           />
-        </a>
+        </div>
       );
     } else if (this.state.status == 'noaccount') {
       let mmClick = () => {
