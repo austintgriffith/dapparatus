@@ -53,6 +53,16 @@ const WEB3_PROVIDER = 'http://0.0.0.0:8545'
 />
 ```
 
+### PrivateKeyCatcher
+
+If you are using paper wallets or other methods to pass in a private key to dapparatus:
+
+```javascript
+  <PrivateKeyCatcher newPrivateKey={(pk)=>{
+       this.setState({newPrivateKey:pk})
+  }}/>
+```
+
 
 ### Metamask
 
