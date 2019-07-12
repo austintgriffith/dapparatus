@@ -8,7 +8,7 @@ import Blockies from 'react-blockies';
 import ENS from 'ethereum-ens';
 import Web3 from 'web3';
 import Button from './button.js';
-import Web3Connect from "web3connect";
+//import Web3Connect from "web3connect";
 
 //import burnerloader from './assets/burnerloader.gif';
 const queryString = require('query-string');
@@ -658,28 +658,6 @@ class Dapparatus extends Component {
                   scale={this.state.config.blockieStyle.size}
                 />
               </div>
-              <Web3Connect.Button
-                providerOptions={{
-                  portis: {
-                    id: "1514e5e5-f6e2-4489-b787-848064af9107", // required
-                    network: "mainnet" // optional
-                  },
-                  fortmatic: {
-                    key: "FORTMATIC_KEY", // required
-                    network: "mainnet" // optional
-                  }
-                }}
-                onConnect={(provider) => {
-                  let web3 = new Web3(provider); // add provider to web3
-                  console.log("SET WEB3")
-                  this.setState({web:web3,provider},()=>{
-                    this.props.onUpdate(Object.assign({}, this.state));
-                  })
-                }}
-                onClose={() => {
-                  console.log("Web3Connect Modal Closed"); // modal has closed
-                }}
-              />
 
           </div>
         );
@@ -702,3 +680,29 @@ class Dapparatus extends Component {
   }
 }
 export default Dapparatus;
+
+/*
+<Web3Connect.Button
+  providerOptions={{
+    portis: {
+      id: "1514e5e5-f6e2-4489-b787-848064af9107", // required
+      network: "mainnet" // optional
+    },
+    fortmatic: {
+      key: "FORTMATIC_KEY", // required
+      network: "mainnet" // optional
+    }
+  }}
+  onConnect={(provider) => {
+    let web3 = new Web3(provider); // add provider to web3
+    console.log("SET WEB3")
+    this.setState({web:web3,provider},()=>{
+      this.props.onUpdate(Object.assign({}, this.state));
+    })
+  }}
+  onClose={() => {
+    console.log("Web3Connect Modal Closed"); // modal has closed
+  }}
+
+/>
+ */
