@@ -8,6 +8,8 @@ import Blockies from 'react-blockies';
 import ENS from 'ethereum-ens';
 import Web3 from 'web3';
 import Button from './button.js';
+import Web3Connect from "web3connect";
+
 //import burnerloader from './assets/burnerloader.gif';
 const queryString = require('query-string');
 
@@ -16,6 +18,8 @@ let defaultConfig = {};
 defaultConfig.DEBUG = false;
 defaultConfig.POLLINTERVAL = 1777;
 defaultConfig.showBalance = true;
+
+defaultConfig.adjustedZoom = 1.5
 
 //metatx
 defaultConfig.metatxAccountGenerator = '//account.metatx.io';
@@ -639,10 +643,7 @@ class Dapparatus extends Component {
 
         dapparatus = (
           <div style={this.state.config.boxStyle}>
-            <a
-              target="_blank"
-              href={this.state.etherscan + 'address/' + this.state.account}
-            >
+
               {textDisplay}
               <div
                 style={{
@@ -657,16 +658,43 @@ class Dapparatus extends Component {
                   scale={this.state.config.blockieStyle.size}
                 />
               </div>
-            </a>
+              <Web3Connect.Button
+                providerOptions={{
+                  portis: {
+                    id: "1514e5e5-f6e2-4489-b787-848064af9107", // required
+                    network: "mainnet" // optional
+                  },
+                  fortmatic: {
+                    key: "FORTMATIC_KEY", // required
+                    network: "mainnet" // optional
+                  }
+                }}
+                onConnect={(provider) => {
+                  let web3 = new Web3(provider); // add provider to web3
+                  console.log("SET WEB3")
+                  this.setState({web:web3,provider},()=>{
+                    this.props.onUpdate(Object.assign({}, this.state));
+                  })
+                }}
+                onClose={() => {
+                  console.log("Web3Connect Modal Closed"); // modal has closed
+                }}
+              />
+
           </div>
         );
+        /*<a
+          target="_blank"
+          href={this.state.etherscan + 'address/' + this.state.account}
+        >*/
+        //</a>
       }
     } else {
       dapparatus = 'error unknown state: ' + this.state.status;
     }
     return (
       <div style={this.state.config.outerBoxStyle}>
-        <Scaler config={{ origin: 'top right', adjustedZoom: 1.5 }}>
+        <Scaler config={{ origin: 'top right', adjustedZoom: this.config.adjustedZoom }}>
           {dapparatus}
         </Scaler>
       </div>
