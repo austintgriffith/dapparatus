@@ -672,7 +672,7 @@ class Dapparatus extends Component {
     }
     return (
       <div style={this.state.config.outerBoxStyle}>
-        <Scaler config={{ origin: 'top right', adjustedZoom: this.config.adjustedZoom }}>
+        <Scaler config={{ origin: 'top right', adjustedZoom: this.state.config.adjustedZoom }}>
           {dapparatus}
         </Scaler>
       </div>
