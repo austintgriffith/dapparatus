@@ -643,7 +643,11 @@ class Dapparatus extends Component {
 
         dapparatus = (
           <div style={this.state.config.boxStyle}>
-
+          <a
+            target="_blank"
+            style={{cursor:"pointer"}}
+            href={this.state.etherscan + 'address/' + this.state.account}
+          >
               {textDisplay}
               <div
                 style={{
@@ -658,14 +662,10 @@ class Dapparatus extends Component {
                   scale={this.state.config.blockieStyle.size}
                 />
               </div>
-
+          </a>
           </div>
         );
-        /*<a
-          target="_blank"
-          href={this.state.etherscan + 'address/' + this.state.account}
-        >*/
-        //</a>
+
       }
     } else {
       dapparatus = 'error unknown state: ' + this.state.status;

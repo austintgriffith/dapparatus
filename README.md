@@ -38,7 +38,7 @@ const WEB3_PROVIDER = 'http://0.0.0.0:8545'
 <Dapparatus
   config={{
     DEBUG:false,
-    requiredNetwork:['Unknown','Rinkeby'],
+    requiredNetwork:['Unknown','Private','Rinkeby'],
     hide:false
   }}
   metatx={METATX}
