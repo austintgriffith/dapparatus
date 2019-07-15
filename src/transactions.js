@@ -157,12 +157,12 @@ class Transactions extends Component {
         }else if(this.props.metaAccount){
 
           console.log("Manually crafting... this might work...",tx,tx.arguments,tx.arguments[0].length)
-          paramsObject.to = tx._parent._address
           paramsObject.data = tx.encodeABI()
-
-          console.log("DATA",paramsObject.data)
-
-          delete paramsObject.chainId
+          if(paramsObject.data.indexOf("0x60806040")==0){
+            //this is a deploy
+          }else{
+            paramsObject.to = tx._parent._address
+          }
 
           console.log("Looking at nonce:")
           this.props.web3.eth.getTransactionCount(paramsObject.from).then((nonce) => {
