@@ -172,13 +172,20 @@ class Transactions extends Component {
               paramsObject.nonce = this.state.txnonce
             }
             this.setState({txnonce:paramsObject.nonce+1})
-            console.log("TTTTTX",tx,paramsObject)
-            this.props.web3.eth.accounts.signTransaction(paramsObject, this.props.metaAccount.privateKey).then(signed => {
-                this.props.web3.eth.sendSignedTransaction(signed.rawTransaction).on('receipt', (receipt)=>{
-                  console.log("META RECEIPT",receipt)
-                  callback(receipt)
-                })
-            });
+            console.log("TTTTTTTTTX",tx,paramsObject)
+            try{
+              this.props.web3.eth.accounts.signTransaction(paramsObject, this.props.metaAccount.privateKey).then(signed => {
+                  this.props.web3.eth.sendSignedTransaction(signed.rawTransaction).on('receipt', (receipt)=>{
+                    console.log("META RECEIPT",receipt)
+                    callback(receipt)
+                  }).on('error', (err)=>{
+                    callback(false,err)
+                  })
+              });
+            }catch(e){
+              console.log("CCCCCCAAAUGHT",e)
+            }
+
           })
 
 
@@ -317,6 +324,8 @@ class Transactions extends Component {
               this.props.web3.eth.sendSignedTransaction(signed.rawTransaction).on('receipt', (receipt)=>{
                 console.log("META RECEIPT",receipt)
                 cb(receipt)
+              }).on('error', (err)=>{
+                cb(false,err)
               })
           });
         }else{
