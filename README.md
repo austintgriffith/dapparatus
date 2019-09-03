@@ -111,7 +111,7 @@ Displays transactions and blocks as progress bars and provides a **tx** function
   etherscan={etherscan}
   onReady={(state)=>{
     //loads in tx() function
-    // use to send transactions: tx(contracts.YOURCONTRACT.YOURFUNCTION(),GASLIMIT)
+    // use to send transactions: tx(contracts.YOURCONTRACT.YOURFUNCTION(),GASLIMIT,TXDATA,TXVALUE,CALLBACK)
     console.log("Transactions component is ready:",state)
     this.setState(state)
   }}
